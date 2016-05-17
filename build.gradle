@@ -1,0 +1,40 @@
+group 'ru.ifmo.genequery'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.0.2'
+    ext.libraries = [
+            kotlin: "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version",
+            test_kotlin: "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version",
+            junit: "junit:junit:4.12"
+    ]
+        repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+apply plugin: 'kotlin'
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+}
+
+dependencies {
+    compile libraries.kotlin
+    compile project(':genequery-core')
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
+
+
