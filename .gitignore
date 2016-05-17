@@ -1,3 +1,8 @@
-build/*
-genequery-core/build/*
-src/*
+build/
+genequery-core/build/
+src/
+
+!gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+.gradle
+.idea/workspace.xml
