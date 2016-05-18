@@ -2,7 +2,9 @@
   <dictionary name="smolcoder">
     <words>
       <w>bonferroni</w>
+      <w>ensembl</w>
       <w>hypergeom</w>
+      <w>refseq</w>
     </words>
   </dictionary>
 </component>

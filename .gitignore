@@ -1,6 +1,6 @@
 build/
 genequery-core/build/
-src/
+/src/
 
 !gradle-wrapper.jar
 gradle/wrapper/gradle-wrapper.properties
