@@ -6,3 +6,4 @@ genequery-core/build/
 gradle/wrapper/gradle-wrapper.properties
 .gradle
 .idea/workspace.xml
+.idea/dictionaries/*
