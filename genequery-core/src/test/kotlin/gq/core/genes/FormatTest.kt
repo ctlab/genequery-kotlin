@@ -3,7 +3,7 @@ package gq.core.genes
 import org.junit.Assert.*
 import org.junit.Test
 
-class GeneFormatTest {
+class FormatTest {
     @Test
     fun testGuessGeneFormat() {
         assertEquals(GeneFormat.SYMBOL, "ENSA".guessGeneFormat())
@@ -15,9 +15,17 @@ class GeneFormatTest {
         assertEquals(GeneFormat.ENSEMBL, "ENSMUSG00000036899.2".guessGeneFormat())
         assertEquals(GeneFormat.ENSEMBL, "ENSRNOG00000008187".guessGeneFormat())
         assertEquals(GeneFormat.ENSEMBL, "ENSRNOG00000008187.3".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "ENSRNOG".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "ENSRNOG00DD".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "ENSRNOG00DD.2".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "ENSRNOG1e10".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "ENSRNOG0.1e-10".guessGeneFormat())
 
         assertEquals(GeneFormat.ENTREZ, "12345".guessGeneFormat())
         assertEquals(GeneFormat.SYMBOL, "s12345".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "1e10".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "1e-10".guessGeneFormat())
+        assertEquals(GeneFormat.SYMBOL, "-1e10".guessGeneFormat())
         assertEquals(GeneFormat.SYMBOL, "-12345".guessGeneFormat())
         assertEquals(GeneFormat.SYMBOL, "1.2345".guessGeneFormat())
         assertEquals(GeneFormat.SYMBOL, "1,2345".guessGeneFormat())

@@ -8,8 +8,8 @@ class GQModuleCollectionKtTest {
 
     companion object {
         var dataset = GQModuleCollection(readModulesFromFiles(
-                Species.HUMAN to Thread.currentThread().contextClassLoader.getResource("hs.modules.gmt").path,
-                Species.MOUSE to Thread.currentThread().contextClassLoader.getResource("mm.modules.gmt").path))
+                Species.HUMAN to Thread.currentThread().contextClassLoader.getResource("collection/hs.modules.gmt").path,
+                Species.MOUSE to Thread.currentThread().contextClassLoader.getResource("collection/mm.modules.gmt").path))
     }
 
     @Test

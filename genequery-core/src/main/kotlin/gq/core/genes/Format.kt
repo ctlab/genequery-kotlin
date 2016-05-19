@@ -1,9 +1,6 @@
 package gq.core.genes
 
-fun String.isDigitsAndNotLeadingDot(): Boolean {
-    if (this[0] == '.') return false
-    return (try { toDouble() } catch (e: NumberFormatException) { -1.0 }) >= 0
-}
+fun String.isDigitsAndNotLeadingDot() = GeneFormat.digitsAndDotRegex.matches(this)
 
 private fun String.isPrefixAndDigitsWithMaybeDot(prefix: String): Boolean {
     return startsWith(prefix) && substringAfter(prefix).isDigitsAndNotLeadingDot()
@@ -18,6 +15,7 @@ enum class GeneFormat(val format: String) {
     companion object {
         internal val REFSEQ_PREFIXES = arrayOf("NM_", "NR_", "XM_", "XR_")
         internal val ENSEMBL_PREFIXES = arrayOf("ENSG", "ENSRNOG", "ENSMUSG")
+        internal val digitsAndDotRegex = Regex("\\d+(\\.?\\d+)?")
     }
 
     override fun toString() = format
