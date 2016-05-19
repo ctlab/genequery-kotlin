@@ -43,14 +43,23 @@ class GeneConverter(speciesEntrezOther: Iterable<GeneMapping> = emptyList(),
         return this
     }
 
-    operator fun get(species: Species, entrezId: Long): String? {
-        return speciesToEntrezToSymbol[species]!![entrezId]
+    operator fun get(species: Species, entrezId: Long) = speciesToEntrezToSymbol[species]!![entrezId]
+    operator fun get(species: Species, otherId: String) = speciesToOtherToEntrez[species]!![otherId]
+
+    fun entrezToSymbol(species: Species, entrezIds: Iterable<Long>) = entrezToSymbolDetailed(species, entrezIds)
+            .mapNotNull { it.value }.toSet()
+    fun otherToEntrez(species: Species, otherIds: Iterable<String>) = otherToEntrezDetailed(species, otherIds)
+            .mapNotNull { it.value }.toSet()
+
+    fun entrezToSymbolDetailed(species: Species, entrezIds: Iterable<Long>): Map<Long, String?> {
+        val currentMapping = speciesToEntrezToSymbol[species]!!
+        return entrezIds.associate { Pair(it, currentMapping[it]) }
     }
 
-    operator fun get(species: Species, otherId: String): Long? {
-        return speciesToOtherToEntrez[species]!![otherId]
+    fun otherToEntrezDetailed(species: Species, entrezIds: Iterable<String>): Map<String, Long?> {
+        val currentMapping = speciesToOtherToEntrez[species]!!
+        return entrezIds.associate { Pair(it, currentMapping[it]) }
     }
-
 }
 
 
