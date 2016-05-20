@@ -36,7 +36,7 @@ fun findBonferroniSignificant(
         query: GQRequest,
         bonferroniMaxPvalue: Double = 0.01): List<SearchResult> {
     val experimentsForThisSpecies = dataset.speciesToGseGpl[query.species] ?: return emptyList()
-    val queryEntrezIds = if (query.entrezIds.isNotEmpty()) query.entrezIds.sorted().toLongArray() else return emptyList()
+    val queryEntrezIds = if (query.entrezIds.isNotEmpty()) query.entrezIds.toSortedSet().toLongArray() else return emptyList()
     val moduleCount = dataset.speciesToModules[query.species]!!.size
 
     return experimentsForThisSpecies.mapNotNull(

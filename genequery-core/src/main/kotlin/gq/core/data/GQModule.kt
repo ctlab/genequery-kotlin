@@ -20,6 +20,7 @@ infix fun LongArray.intersectWithSorted(other: LongArray): LongArray {
     return result.toLongArray()
 }
 
+
 fun LongArray.sizeOfIntersectionWithSorted(other: LongArray): Int {
     var result = 0
     var thisIndex = 0
@@ -38,6 +39,10 @@ fun LongArray.sizeOfIntersectionWithSorted(other: LongArray): Int {
     }
     return result
 }
+
+
+fun LongArray.sizeOfIntersectionWithSorted(other: List<Long>) = sizeOfIntersectionWithSorted(other.toLongArray())
+
 
 class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Species, entrezIds: LongArray) {
     init {

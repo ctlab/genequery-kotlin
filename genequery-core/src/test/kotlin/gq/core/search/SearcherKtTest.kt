@@ -71,4 +71,18 @@ class SearcherKtTest {
         val result = findBonferroniSignificant(dataset, query)
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun testNoisedVsOriginalQuery() {
+        val query = GQRequest(Species.MOUSE, readEntrezIds("hypoxia.txt"))
+        val queryWithNoise = GQRequest(Species.MOUSE, readEntrezIds("hypoxia-with-noise.txt"))
+        val result = findBonferroniSignificant(dataset, query)
+        val resultWithNoise = findBonferroniSignificant(dataset, queryWithNoise)
+        assertEquals(result.size, resultWithNoise.size)
+        assertEquals(result.map { it.gse }, resultWithNoise.map { it.gse })
+        assertEquals(result.map { it.intersectionSize }, resultWithNoise.map { it.intersectionSize })
+        assertEquals(result.map { it.moduleNumber }, resultWithNoise.map { it.moduleNumber })
+        assertDoubleEquals(result.first().logPvalue, resultWithNoise.first().logPvalue, 1e-3)
+        assertDoubleEquals(result.last().logPvalue, resultWithNoise.last().logPvalue, 1e-3)
+    }
 }
