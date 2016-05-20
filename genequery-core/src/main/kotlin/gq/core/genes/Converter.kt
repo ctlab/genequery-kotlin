@@ -5,14 +5,14 @@ import java.io.File
 
 data class GeneMapping(val species: Species, val entrezId: Long, val otherId: String)
 
-class GeneConverter(speciesEntrezOther: Iterable<GeneMapping> = emptyList(),
-                    speciesEntrezSymbol: Iterable<GeneMapping> = emptyList()) {
+class GeneConverter(toEntrezFromOtherMappings: Iterable<GeneMapping> = emptyList(),
+                    toEntrezFromSymbolMappings: Iterable<GeneMapping> = emptyList()) {
     private val speciesToEntrezToSymbol = hashMapOf<Species, Map<Long, String>>()
     private val speciesToOtherToEntrez = hashMapOf<Species, Map<String, Long>>()
 
     init {
-        populateOtherToEntrez(speciesEntrezOther)
-        populateEntrezToSymbol(speciesEntrezSymbol)
+        populateOtherToEntrez(toEntrezFromOtherMappings)
+        populateEntrezToSymbol(toEntrezFromSymbolMappings)
     }
 
     fun populateOtherToEntrez(speciesEntrezOtherInit: () -> Iterable<GeneMapping>) =
@@ -25,7 +25,7 @@ class GeneConverter(speciesEntrezOther: Iterable<GeneMapping> = emptyList(),
                         .groupBy({ it.otherId }, { it.entrezId })
                         .mapValues { it.value.min()!! } }
         newSpeciesToOtherToEntrez
-                .forEach { speciesToOtherToEntrez.merge(it.key, it.value, { existing, new -> existing.plus(new) }) }
+                .forEach { speciesToOtherToEntrez.merge(it.key, it.value, { existing, new -> existing + new }) }
         return this
     }
 
@@ -39,7 +39,7 @@ class GeneConverter(speciesEntrezOther: Iterable<GeneMapping> = emptyList(),
                         .groupBy({ it.entrezId }, { it.otherId })
                         .mapValues { it.value.first() } }
         newSpeciesToEntrezToSymbol
-                .forEach { speciesToEntrezToSymbol.merge(it.key, it.value, { existing, new -> existing.plus(new) }) }
+                .forEach { speciesToEntrezToSymbol.merge(it.key, it.value, { existing, new -> existing + new }) }
         return this
     }
 
@@ -59,6 +59,57 @@ class GeneConverter(speciesEntrezOther: Iterable<GeneMapping> = emptyList(),
     fun otherToEntrezDetailed(species: Species, entrezIds: Iterable<String>): Map<String, Long?> {
         val currentMapping = speciesToOtherToEntrez[species]!!
         return entrezIds.associate { Pair(it, currentMapping[it]) }
+    }
+}
+
+
+data class OrthologyMapping(val groupId: Int,
+                            val species: Species,
+                            val entrezId: Long,
+                            val symbolId: String,
+                            val refseqId: String)
+
+class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
+    private val groupIdToOrthology = orthologyMappings
+            .groupBy { it.groupId }
+            .mapValues { it.value.groupBy { it.species }.mapValues { it.value.single() } }
+    private val entrezToOrthology = orthologyMappings.associate { Pair(it.entrezId, groupIdToOrthology[it.groupId]!!) }
+    private val symbolToOrthology = orthologyMappings.associate { Pair(it.symbolId, groupIdToOrthology[it.groupId]!!) }
+
+    constructor(orthologyMappingsInit: () -> Iterable<OrthologyMapping>) : this(orthologyMappingsInit())
+
+    operator fun get(entrezId: Long, species: Species) = entrezToOrthology[entrezId]?.get(species)
+    operator fun get(symbolId: String, species: Species) = symbolToOrthology[symbolId]?.get(species)
+
+    fun entrezToEntrezDetailed(entrezIds: Iterable<Long>, species: Species) =
+            entrezIds.associate { Pair(it, this[it, species]?.entrezId) }
+
+    fun entrezToSymbolDetailed(entrezIds: Iterable<Long>, species: Species) =
+            entrezIds.associate { Pair(it, this[it, species]?.symbolId) }
+
+    fun symbolToEntrezDetailed(symbolIds: Iterable<String>, species: Species) =
+            symbolIds.associate { Pair(it, this[it, species]?.entrezId) }
+
+    fun symbolToSymbolDetailed(symbolIds: Iterable<String>, species: Species) =
+            symbolIds.associate { Pair(it, this[it, species]?.symbolId) }
+
+    fun bulkEntrezToEntrez(entrezIds: Iterable<Long>,
+                           species: Species) = entrezToEntrezDetailed(entrezIds, species).values.mapNotNull { it }
+    fun bulkEntrezToSymbol(entrezIds: Iterable<Long>,
+                           species: Species) = entrezToSymbolDetailed(entrezIds, species).values.mapNotNull { it }
+    fun bulkSymbolToEntrez(symbolIds: Iterable<String>,
+                           species: Species) = symbolToEntrezDetailed(symbolIds, species).values.mapNotNull { it }
+    fun bulkSymbolToSymbol(symbolIds: Iterable<String>,
+                           species: Species) = symbolToSymbolDetailed(symbolIds, species).values.mapNotNull { it }
+}
+
+
+internal fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
+    if (it.isNotEmpty()) {
+        val (groupId, species, entrez, symbol, refseq) = it.split("\t")
+        OrthologyMapping(groupId.toInt(), Species.fromOriginal(species), entrez.toLong(), symbol, refseq)
+    } else {
+        null
     }
 }
 
