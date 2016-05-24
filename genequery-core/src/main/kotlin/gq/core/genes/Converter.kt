@@ -98,6 +98,16 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
 }
 
 
+fun mapGenesToNormalized(genes: List<String>,
+                         format: GeneFormat = gq.core.genes.detectGeneSetFormat(genes)): Map<String, String> {
+    val result = genes.associate { Pair(it, it.toUpperCase()) }
+    return when(format) {
+        GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> result.mapValues { it.value.substringBefore(".") }
+        else -> result
+    }
+}
+
+
 fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
     if (it.isNotEmpty()) {
         val (groupId, species, entrez, symbol, refseq) = it.split("\t")
@@ -117,7 +127,8 @@ fun File.readGeneMappings(): Iterable<GeneMapping> = readLines().mapNotNull {
     }
 }
 
-fun detectGenesFormat(genes: List<String>): GeneFormat {
+
+fun detectGeneSetFormat(genes: List<String>): GeneFormat {
     require(genes.isNotEmpty(), { "Gene list is empty." })
 
     val actualGeneFormat = guessGeneFormat(genes.first())
