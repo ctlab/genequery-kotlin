@@ -3,7 +3,6 @@ package gq.core.genes
 import gq.core.data.Species
 import org.junit.Assert.*
 import org.junit.Test
-import java.util.*
 
 class GeneOrthologyConverterTest {
     companion object {

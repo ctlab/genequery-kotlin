@@ -5,60 +5,54 @@ import java.io.File
 
 data class GeneMapping(val species: Species, val entrezId: Long, val otherId: String)
 
-class GeneConverter(toEntrezFromOtherMappings: Iterable<GeneMapping> = emptyList(),
-                    toEntrezFromSymbolMappings: Iterable<GeneMapping> = emptyList()) {
-    private val speciesToEntrezToSymbol = hashMapOf<Species, Map<Long, String>>()
-    private val speciesToOtherToEntrez = hashMapOf<Species, Map<String, Long>>()
+abstract class FromGeneToGeneConverter<TFrom, TTo : Any>(mappings: Iterable<GeneMapping> = emptyList()) {
+    protected  val fromToMapping = hashMapOf<Species, Map<TFrom, TTo>>()
 
     init {
-        populateOtherToEntrez(toEntrezFromOtherMappings)
-        populateEntrezToSymbol(toEntrezFromSymbolMappings)
+        populate(mappings)
     }
 
-    inline fun populateOtherToEntrez(speciesEntrezOtherInit: () -> Iterable<GeneMapping>) =
-            populateOtherToEntrez(speciesEntrezOtherInit())
+    abstract fun populate(initMappings: Iterable<GeneMapping>): FromGeneToGeneConverter<TFrom, TTo>
 
-    fun populateOtherToEntrez(speciesEntrezOther: Iterable<GeneMapping>): GeneConverter {
-        val newSpeciesToOtherToEntrez = speciesEntrezOther
+    inline fun populate(initMappingsFunc: () -> Iterable<GeneMapping>) = populate(initMappingsFunc())
+
+    operator fun get(species: Species, fromId: TFrom) = fromToMapping[species]!![fromId]
+
+    fun convert(species: Species, fromId: TFrom) = get(species, fromId)
+    fun convert(species: Species, fromIds: Iterable<TFrom>) = convertDetailed(species, fromIds).mapNotNull { it.value }.toSet()
+
+    fun convertDetailed(species: Species, entrezIds: Iterable<TFrom>): Map<TFrom, TTo?> {
+        val currentMapping = fromToMapping[species]!!
+        return entrezIds.associate { Pair(it, currentMapping[it]) }
+    }
+
+}
+
+class ToEntrezConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList())
+: FromGeneToGeneConverter<String, Long>(entrezOtherMappings) {
+    override fun populate(initMappings: Iterable<GeneMapping>): ToEntrezConverter {
+        val newSpeciesToOtherToEntrez = initMappings
                 .groupBy { it.species }
                 .mapValues { it.value
                         .groupBy({ it.otherId }, { it.entrezId })
                         .mapValues { it.value.min()!! } }
         newSpeciesToOtherToEntrez
-                .forEach { speciesToOtherToEntrez.merge(it.key, it.value, { existing, new -> existing + new }) }
+                .forEach { fromToMapping.merge(it.key, it.value, { existing, new -> existing + new }) }
         return this
     }
+}
 
-    inline fun populateEntrezToSymbol(speciesEntrezSymbolInit: () -> Iterable<GeneMapping>) =
-            populateEntrezToSymbol(speciesEntrezSymbolInit())
-
-    fun populateEntrezToSymbol(speciesEntrezSymbol: Iterable<GeneMapping>): GeneConverter {
-        val newSpeciesToEntrezToSymbol = speciesEntrezSymbol
+class FromEntrezToSymbolConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList())
+: FromGeneToGeneConverter<Long, String>(entrezOtherMappings) {
+    override fun populate(initMappings: Iterable<GeneMapping>): FromEntrezToSymbolConverter {
+        val newSpeciesToEntrezToSymbol = initMappings
                 .groupBy { it.species }
                 .mapValues { it.value
                         .groupBy({ it.entrezId }, { it.otherId })
                         .mapValues { it.value.first() } }
         newSpeciesToEntrezToSymbol
-                .forEach { speciesToEntrezToSymbol.merge(it.key, it.value, { existing, new -> existing + new }) }
+                .forEach { fromToMapping.merge(it.key, it.value, { existing, new -> existing + new }) }
         return this
-    }
-
-    operator fun get(species: Species, entrezId: Long) = speciesToEntrezToSymbol[species]!![entrezId]
-    operator fun get(species: Species, otherId: String) = speciesToOtherToEntrez[species]!![otherId]
-
-    fun entrezToSymbol(species: Species, entrezIds: Iterable<Long>) = entrezToSymbolDetailed(species, entrezIds)
-            .mapNotNull { it.value }.toSet()
-    fun otherToEntrez(species: Species, otherIds: Iterable<String>) = otherToEntrezDetailed(species, otherIds)
-            .mapNotNull { it.value }.toSet()
-
-    fun entrezToSymbolDetailed(species: Species, entrezIds: Iterable<Long>): Map<Long, String?> {
-        val currentMapping = speciesToEntrezToSymbol[species]!!
-        return entrezIds.associate { Pair(it, currentMapping[it]) }
-    }
-
-    fun otherToEntrezDetailed(species: Species, entrezIds: Iterable<String>): Map<String, Long?> {
-        val currentMapping = speciesToOtherToEntrez[species]!!
-        return entrezIds.associate { Pair(it, currentMapping[it]) }
     }
 }
 
