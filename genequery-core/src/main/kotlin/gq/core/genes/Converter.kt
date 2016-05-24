@@ -15,7 +15,7 @@ class GeneConverter(toEntrezFromOtherMappings: Iterable<GeneMapping> = emptyList
         populateEntrezToSymbol(toEntrezFromSymbolMappings)
     }
 
-    fun populateOtherToEntrez(speciesEntrezOtherInit: () -> Iterable<GeneMapping>) =
+    inline fun populateOtherToEntrez(speciesEntrezOtherInit: () -> Iterable<GeneMapping>) =
             populateOtherToEntrez(speciesEntrezOtherInit())
 
     fun populateOtherToEntrez(speciesEntrezOther: Iterable<GeneMapping>): GeneConverter {
@@ -29,7 +29,7 @@ class GeneConverter(toEntrezFromOtherMappings: Iterable<GeneMapping> = emptyList
         return this
     }
 
-    fun populateEntrezToSymbol(speciesEntrezSymbolInit: () -> Iterable<GeneMapping>) =
+    inline fun populateEntrezToSymbol(speciesEntrezSymbolInit: () -> Iterable<GeneMapping>) =
             populateEntrezToSymbol(speciesEntrezSymbolInit())
 
     fun populateEntrezToSymbol(speciesEntrezSymbol: Iterable<GeneMapping>): GeneConverter {
@@ -94,17 +94,17 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
             symbolIds.associate { Pair(it, this[it, species]?.symbolId) }
 
     fun bulkEntrezToEntrez(entrezIds: Iterable<Long>,
-                           species: Species) = entrezToEntrezDetailed(entrezIds, species).values.mapNotNull { it }
+                           speciesTo: Species) = entrezToEntrezDetailed(entrezIds, speciesTo).values.mapNotNull { it }
     fun bulkEntrezToSymbol(entrezIds: Iterable<Long>,
-                           species: Species) = entrezToSymbolDetailed(entrezIds, species).values.mapNotNull { it }
+                           speciesTo: Species) = entrezToSymbolDetailed(entrezIds, speciesTo).values.mapNotNull { it }
     fun bulkSymbolToEntrez(symbolIds: Iterable<String>,
-                           species: Species) = symbolToEntrezDetailed(symbolIds, species).values.mapNotNull { it }
+                           speciesTo: Species) = symbolToEntrezDetailed(symbolIds, speciesTo).values.mapNotNull { it }
     fun bulkSymbolToSymbol(symbolIds: Iterable<String>,
-                           species: Species) = symbolToSymbolDetailed(symbolIds, species).values.mapNotNull { it }
+                           speciesTo: Species) = symbolToSymbolDetailed(symbolIds, speciesTo).values.mapNotNull { it }
 }
 
 
-internal fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
+fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
     if (it.isNotEmpty()) {
         val (groupId, species, entrez, symbol, refseq) = it.split("\t")
         OrthologyMapping(groupId.toInt(), Species.fromOriginal(species), entrez.toLong(), symbol, refseq)
@@ -114,11 +114,23 @@ internal fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = read
 }
 
 
-internal fun File.readGeneMappings(): Iterable<GeneMapping> = readLines().mapNotNull {
+fun File.readGeneMappings(): Iterable<GeneMapping> = readLines().mapNotNull {
     if (it.isNotEmpty()) {
         val (species, entrez, other) = it.split("\t")
         GeneMapping(Species.fromOriginal(species), entrez.toLong(), other)
     } else {
         null
     }
+}
+
+fun detectGenesFormat(genes: List<String>): GeneFormat {
+    require(genes.isNotEmpty(), { "Gene list is empty." })
+
+    val actualGeneFormat = guessGeneFormat(genes.first())
+    genes.forEachIndexed { i, gene ->
+        val currentGeneFormat = guessGeneFormat(gene)
+        if (currentGeneFormat != actualGeneFormat) throw IllegalArgumentException(
+                "Ambiguous gene format: first gene (${genes.first()}) is $actualGeneFormat, but ${i + 1}th gene ($gene) is $currentGeneFormat")
+    }
+    return actualGeneFormat
 }

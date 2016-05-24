@@ -14,11 +14,13 @@ fun populateModulesFromGmt(path: String, species: Species, dest: MutableList<GQM
     }
 }
 
-fun readModulesFromFiles(vararg speciesToPath: Pair<Species, String>): List<GQModule> {
+fun readModulesFromFiles(speciesToPath: Iterable<Pair<Species, String>>): List<GQModule> {
     val modules = mutableListOf<GQModule>()
     speciesToPath.forEach { populateModulesFromGmt(it.second, it.first, modules) }
     return modules
 }
+
+fun readModulesFromFiles(vararg speciesToPath: Pair<Species, String>) = readModulesFromFiles(speciesToPath.asList())
 
 class GQModuleCollection(modules: Iterable<GQModule>) {
 

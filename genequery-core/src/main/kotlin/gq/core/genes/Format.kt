@@ -1,10 +1,11 @@
 package gq.core.genes
 
-fun String.isDigitsAndNotLeadingDot() = GeneFormat.digitsAndDotRegex.matches(this)
+private fun isDigitsAndNotLeadingDot(string: String) = GeneFormat.digitsAndDotRegex.matches(string)
 
-private fun String.isPrefixAndDigitsWithMaybeDot(prefix: String): Boolean {
-    return startsWith(prefix) && substringAfter(prefix).isDigitsAndNotLeadingDot()
-}
+
+private fun isPrefixAndDigitsWithMaybeDot(string: String, prefix: String) =
+        string.startsWith(prefix) && isDigitsAndNotLeadingDot(string.substringAfter(prefix))
+
 
 enum class GeneFormat(val format: String) {
     ENTREZ("entrez"),
@@ -21,19 +22,18 @@ enum class GeneFormat(val format: String) {
     override fun toString() = format
 }
 
-fun Long.isEntrez() = this >= 0
-fun String.isEntrez() = try { toLong() } catch (e: NumberFormatException) { Long.MIN_VALUE }.isEntrez()
-fun String.isRefSeq() = GeneFormat.REFSEQ_PREFIXES.any { isPrefixAndDigitsWithMaybeDot(it) }
-fun String.isEnsembl() = GeneFormat.ENSEMBL_PREFIXES.any { isPrefixAndDigitsWithMaybeDot(it) }
 
-/**
- * Returns true if gene is none of entrez, refseq or ensemble format.
- */
-fun String.isSymbol() = !(isEntrez() || isRefSeq() || isEnsembl())
+fun isEntrez(number: Long) = number >= 0
+fun isEntrez(string: String) = try { isEntrez(string.toLong()) } catch (e: NumberFormatException) { false }
+fun isRefSeq(string: String) = GeneFormat.REFSEQ_PREFIXES.any { isPrefixAndDigitsWithMaybeDot(string, it) }
+fun isEnsembl(string: String) = GeneFormat.ENSEMBL_PREFIXES.any { isPrefixAndDigitsWithMaybeDot(string, it) }
+fun isSymbol(string: String) = !(isEntrez(string) || isRefSeq(string) || isEnsembl(string))
 
-fun String.guessGeneFormat(): GeneFormat {
-    if (isEntrez()) return GeneFormat.ENTREZ
-    if (isRefSeq()) return GeneFormat.REFSEQ
-    if (isEnsembl()) return GeneFormat.ENSEMBL
+
+fun guessGeneFormat(string: String): GeneFormat {
+    require(string.isNotBlank(), { "Empty string passed." })
+    if (isEntrez(string)) return GeneFormat.ENTREZ
+    if (isRefSeq(string)) return GeneFormat.REFSEQ
+    if (isEnsembl(string)) return GeneFormat.ENSEMBL
     return GeneFormat.SYMBOL
 }

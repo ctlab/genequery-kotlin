@@ -6,6 +6,7 @@ import org.junit.Test
 import org.junit.Assert.*
 import java.io.File
 import java.nio.file.Paths
+import kotlin.test.expect
 
 class GeneConverterTest {
 
@@ -120,5 +121,4 @@ class GeneConverterTest {
         assertEquals(setOf("A1BG", "A2M", "DUPLICATE"), set)
         assertTrue(converter.entrezToSymbol(Species.HUMAN, emptyList()).isEmpty())
     }
-
 }
