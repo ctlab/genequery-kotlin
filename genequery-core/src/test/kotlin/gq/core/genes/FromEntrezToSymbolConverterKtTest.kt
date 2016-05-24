@@ -13,23 +13,25 @@ class FromEntrezToSymbolConverterKtTest {
             Thread.currentThread().contextClassLoader.getResource("converter").path.toString(),
             fileName).toString()
 
-    fun getToSymbolConverter() = FromEntrezToSymbolConverter(File(getPath("symbol-to-entrez.txt")).readGeneMappings())
+    fun readMappings(fileName: String, geneFormat: GeneFormat) = File(getPath(fileName)).readAndNormalizeGeneMappings(geneFormat)
+
+    fun getToSymbolConverter() = FromEntrezToSymbolConverter(readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL))
 
     @Test(expected = NullPointerException::class)
     fun testEntrezToSymbolNoSpecies() {
-        val converter = FromEntrezToSymbolConverter(File(getPath("symbol-to-entrez.txt")).readGeneMappings())
+        val converter = FromEntrezToSymbolConverter(readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL))
         converter[Species.RAT, 9]
     }
 
     @Test
     fun testConvertEntrezToSymbol() {
-        val converter = FromEntrezToSymbolConverter(File(getPath("symbol-to-entrez.txt")).readGeneMappings())
+        val converter = FromEntrezToSymbolConverter(readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL))
         assertEquals("A2M", converter[Species.HUMAN, 2L])
         assertEquals(converter.convert(Species.HUMAN, 2L), converter[Species.HUMAN, 2L])
         assertEquals("DUPLICATE", converter[Species.HUMAN, 26L])
         assertEquals("DUPLICATE", converter[Species.HUMAN, 27L])
         assertEquals("DUPLICATE", converter[Species.HUMAN, 28L])
-        assertEquals("Aanat", converter[Species.MOUSE, 11298L])
+        assertEquals("AANAT", converter[Species.MOUSE, 11298L])
     }
 
     @Test

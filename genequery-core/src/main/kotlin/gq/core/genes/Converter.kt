@@ -98,44 +98,29 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
 }
 
 
-fun mapGenesToNormalized(genes: List<String>,
-                         format: GeneFormat = gq.core.genes.detectGeneSetFormat(genes)): Map<String, String> {
-    val result = genes.associate { Pair(it, it.toUpperCase()) }
-    return when(format) {
-        GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> result.mapValues { it.value.substringBefore(".") }
-        else -> result
-    }
-}
-
-
 fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
     if (it.isNotEmpty()) {
         val (groupId, species, entrez, symbol, refseq) = it.split("\t")
-        OrthologyMapping(groupId.toInt(), Species.fromOriginal(species), entrez.toLong(), symbol, refseq)
+        OrthologyMapping(
+                groupId.toInt(),
+                Species.fromOriginal(species),
+                entrez.toLong(),
+                GeneFormat.SYMBOL.normalize(symbol),
+                GeneFormat.REFSEQ.normalize(refseq))
     } else {
         null
     }
 }
 
 
-fun File.readGeneMappings(): Iterable<GeneMapping> = readLines().mapNotNull {
+fun File.readAndNormalizeGeneMappings(otherGeneFormat: GeneFormat): Iterable<GeneMapping> = readLines().mapNotNull {
     if (it.isNotEmpty()) {
         val (species, entrez, other) = it.split("\t")
-        GeneMapping(Species.fromOriginal(species), entrez.toLong(), other)
+        GeneMapping(
+                Species.fromOriginal(species),
+                entrez.toLong(),
+                otherGeneFormat.normalize(other))
     } else {
         null
     }
-}
-
-
-fun detectGeneSetFormat(genes: List<String>): GeneFormat {
-    require(genes.isNotEmpty(), { "Gene list is empty." })
-
-    val actualGeneFormat = guessGeneFormat(genes.first())
-    genes.forEachIndexed { i, gene ->
-        val currentGeneFormat = guessGeneFormat(gene)
-        if (currentGeneFormat != actualGeneFormat) throw IllegalArgumentException(
-                "Ambiguous gene format: first gene (${genes.first()}) is $actualGeneFormat, but ${i + 1}th gene ($gene) is $currentGeneFormat")
-    }
-    return actualGeneFormat
 }

@@ -13,25 +13,28 @@ class ToEntrezConverterKtTest {
             Thread.currentThread().contextClassLoader.getResource("converter").path.toString(),
             fileName).toString()
 
+    fun readMappings(fileName: String, geneFormat: GeneFormat) = File(getPath(fileName)).readAndNormalizeGeneMappings(geneFormat)
+
     fun getToEntrezConverter() = ToEntrezConverter()
-            .populate { File(getPath("refseq-to-entrez.txt")).readGeneMappings() }
-            .populate { File(getPath("symbol-to-entrez.txt")).readGeneMappings() }
-            .populate { File(getPath("ensembl-to-entrez.txt")).readGeneMappings() }
+            .populate { readMappings("refseq-to-entrez.txt", GeneFormat.REFSEQ) }
+            .populate { readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL) }
+            .populate { readMappings("ensembl-to-entrez.txt", GeneFormat.ENSEMBL) }
 
     @Test
     fun testConvertOtherToEntrez() {
-        val converter = ToEntrezConverter(File(getPath("refseq-to-entrez.txt")).readGeneMappings())
+        val converter = ToEntrezConverter(readMappings("refseq-to-entrez.txt", GeneFormat.REFSEQ))
         assertEquals(9L, converter[Species.HUMAN, "NM_001160175"])
         assertEquals(converter.convert(Species.HUMAN, "NM_001160175"), converter[Species.HUMAN, "NM_001160175"])
         assertNull(converter[Species.HUMAN, "NM_00116017500000"])
 
-        converter.populate(File(getPath("symbol-to-entrez.txt")).readGeneMappings())
+        converter.populate(readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL))
         assertEquals(2L, converter[Species.HUMAN, "A2M"])
         assertEquals(26L, converter[Species.HUMAN, "DUPLICATE"])
-        assertEquals(11287L, converter[Species.MOUSE, "Pzp"])
-        assertNull(converter[Species.HUMAN, "Pzp"])
+        assertEquals(11287L, converter[Species.MOUSE, "PZP"])
+        assertNull(converter[Species.MOUSE, "Pzp"])
+        assertNull(converter[Species.HUMAN, "PZP"])
 
-        converter.populate(File(getPath("ensembl-to-entrez.txt")).readGeneMappings())
+        converter.populate(readMappings("ensembl-to-entrez.txt", GeneFormat.ENSEMBL))
         assertEquals(24L, converter[Species.HUMAN, "ENSG00000198691"])
         assertEquals(27L, converter[Species.HUMAN, "ENSG10000002726"])
         assertEquals(27L, converter[Species.HUMAN, "ENSG20000002726"])
@@ -39,11 +42,7 @@ class ToEntrezConverterKtTest {
 
     @Test
     fun testConvertOtherToEntrez2() {
-        val converter = ToEntrezConverter()
-                .populate(File(getPath("refseq-to-entrez.txt")).readGeneMappings())
-                .populate(File(getPath("symbol-to-entrez.txt")).readGeneMappings())
-                .populate(File(getPath("ensembl-to-entrez.txt")).readGeneMappings())
-
+        val converter = getToEntrezConverter()
         assertEquals(9L, converter[Species.HUMAN, "NM_001160175"])
         assertEquals(2L, converter[Species.HUMAN, "A2M"])
         assertEquals(26L, converter[Species.HUMAN, "DUPLICATE"])
@@ -54,7 +53,7 @@ class ToEntrezConverterKtTest {
 
     @Test(expected = NullPointerException::class)
     fun testPopulateOtherToEntrezNoSpecies() {
-        val converter = ToEntrezConverter(File(getPath("refseq-to-entrez.txt")).readGeneMappings())
+        val converter = ToEntrezConverter(readMappings("refseq-to-entrez.txt", GeneFormat.REFSEQ))
         converter[Species.RAT, "NM_001160175"]
     }
 
