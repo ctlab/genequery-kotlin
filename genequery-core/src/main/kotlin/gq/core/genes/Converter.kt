@@ -79,32 +79,20 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
             .mapValues { it.value.groupBy { it.species }.mapValues { it.value.single() } }
     private val entrezToOrthology = orthologyMappings.associate { Pair(it.entrezId, groupIdToOrthology[it.groupId]!!) }
     private val symbolToOrthology = orthologyMappings.associate { Pair(it.symbolId, groupIdToOrthology[it.groupId]!!) }
+    private val refseqToOrthology = orthologyMappings.associate { Pair(it.refseqId, groupIdToOrthology[it.groupId]!!) }
 
     constructor(orthologyMappingsInit: () -> Iterable<OrthologyMapping>) : this(orthologyMappingsInit())
 
-    operator fun get(entrezId: Long, species: Species) = entrezToOrthology[entrezId]?.get(species)
-    operator fun get(symbolId: String, species: Species) = symbolToOrthology[symbolId]?.get(species)
+    fun getOrthologyByEntrez(entrezId: Long, speciesTo: Species) = entrezToOrthology[entrezId]?.get(speciesTo)
+    fun getOrthologyBySymbol(symbolId: String, speciesTo: Species) = symbolToOrthology[symbolId]?.get(speciesTo)
+    fun getOrthologyByRefseq(refseqId: String, speciesTo: Species) = refseqToOrthology[refseqId]?.get(speciesTo)
 
-    fun entrezToEntrezDetailed(entrezIds: Iterable<Long>, species: Species) =
-            entrezIds.associate { Pair(it, this[it, species]?.entrezId) }
-
-    fun entrezToSymbolDetailed(entrezIds: Iterable<Long>, species: Species) =
-            entrezIds.associate { Pair(it, this[it, species]?.symbolId) }
-
-    fun symbolToEntrezDetailed(symbolIds: Iterable<String>, species: Species) =
-            symbolIds.associate { Pair(it, this[it, species]?.entrezId) }
-
-    fun symbolToSymbolDetailed(symbolIds: Iterable<String>, species: Species) =
-            symbolIds.associate { Pair(it, this[it, species]?.symbolId) }
-
-    fun bulkEntrezToEntrez(entrezIds: Iterable<Long>,
-                           speciesTo: Species) = entrezToEntrezDetailed(entrezIds, speciesTo).values.mapNotNull { it }
-    fun bulkEntrezToSymbol(entrezIds: Iterable<Long>,
-                           speciesTo: Species) = entrezToSymbolDetailed(entrezIds, speciesTo).values.mapNotNull { it }
-    fun bulkSymbolToEntrez(symbolIds: Iterable<String>,
-                           speciesTo: Species) = symbolToEntrezDetailed(symbolIds, speciesTo).values.mapNotNull { it }
-    fun bulkSymbolToSymbol(symbolIds: Iterable<String>,
-                           speciesTo: Species) = symbolToSymbolDetailed(symbolIds, speciesTo).values.mapNotNull { it }
+    fun getOrthologyByEntrez(entrezIds: Iterable<Long>, speciesTo: Species) =
+            entrezIds.associate { Pair(it, getOrthologyByEntrez(it, speciesTo)) }
+    fun getOrthologyBySymbol(symbolIds: Iterable<String>, speciesTo: Species) =
+            symbolIds.associate { Pair(it, getOrthologyBySymbol(it, speciesTo)) }
+    fun getOrthologyByRefseq(refseqIds: Iterable<String>, speciesTo: Species) =
+            refseqIds.associate { Pair(it, getOrthologyByRefseq(it, speciesTo)) }
 }
 
 

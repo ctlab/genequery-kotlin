@@ -30,106 +30,48 @@ class GeneOrthologyConverterTest {
 
     @Test
     fun testGet() {
-        assertEquals(1L, orthology[1, Species.HUMAN]?.entrezId)
-        assertEquals("1", orthology[1, Species.HUMAN]?.symbolId)
-        assertEquals(2L, orthology[1, Species.MOUSE]?.entrezId)
-        assertEquals("2", orthology[1, Species.MOUSE]?.symbolId)
+        assertEquals(1L, orthology.getOrthologyByEntrez(1, Species.HUMAN)?.entrezId)
+        assertEquals("1", orthology.getOrthologyByEntrez(1, Species.HUMAN)?.symbolId)
+        assertEquals(2L, orthology.getOrthologyByEntrez(1, Species.MOUSE)?.entrezId)
+        assertEquals("2", orthology.getOrthologyByEntrez(1, Species.MOUSE)?.symbolId)
 
-        assertEquals(1L, orthology["1", Species.HUMAN]?.entrezId)
-        assertEquals("1", orthology["1", Species.HUMAN]?.symbolId)
-        assertEquals(2L, orthology["1", Species.MOUSE]?.entrezId)
-        assertEquals("2", orthology["1", Species.MOUSE]?.symbolId)
+        assertEquals(1L, orthology.getOrthologyBySymbol("1", Species.HUMAN)?.entrezId)
+        assertEquals("1", orthology.getOrthologyBySymbol("1", Species.HUMAN)?.symbolId)
+        assertEquals(2L, orthology.getOrthologyBySymbol("1", Species.MOUSE)?.entrezId)
+        assertEquals("2", orthology.getOrthologyBySymbol("1", Species.MOUSE)?.symbolId)
 
-        assertEquals(22L, orthology["a", Species.MOUSE]?.entrezId)
-        assertEquals(33L, orthology["a", Species.RAT]?.entrezId)
-        assertEquals(11L, orthology["a", Species.HUMAN]?.entrezId)
-        assertEquals(11L, orthology["A", Species.HUMAN]?.entrezId)
-        assertEquals(22L, orthology["A", Species.MOUSE]?.entrezId)
+        assertEquals(22L, orthology.getOrthologyBySymbol("a", Species.MOUSE)?.entrezId)
+        assertEquals(33L, orthology.getOrthologyBySymbol("a", Species.RAT)?.entrezId)
+        assertEquals(11L, orthology.getOrthologyBySymbol("a", Species.HUMAN)?.entrezId)
+        assertEquals(11L, orthology.getOrthologyBySymbol("A", Species.HUMAN)?.entrezId)
+        assertEquals(22L, orthology.getOrthologyBySymbol("A", Species.MOUSE)?.entrezId)
 
-        assertNull(orthology[100, Species.HUMAN])
-        assertNull(orthology[111, Species.RAT])
-    }
+        assertEquals(2L, orthology.getOrthologyByRefseq("r1", Species.MOUSE)?.entrezId)
 
-    @Test
-    fun testEntrezToEntrezDetailed() {
-        assertEquals(
-                mapOf(1L to 1L, 11L to 11L, 100L to null),
-                orthology.entrezToEntrezDetailed(listOf<Long>(1, 11, 100), Species.HUMAN)
-        )
-        assertEquals(
-                mapOf(1L to 2L, 11L to 22L, 100L to null),
-                orthology.entrezToEntrezDetailed(listOf<Long>(1, 11, 100), Species.MOUSE)
-        )
-        assertEquals(
-                mapOf(1L to 3L, 11L to 33L, 111L to null, 100L to null),
-                orthology.entrezToEntrezDetailed(listOf<Long>(1, 11, 111, 100), Species.RAT)
-        )
-    }
-
-    @Test
-    fun testEntrezToSymbolDetailed() {
-        assertEquals(
-                mapOf(1L to "1", 11L to "A", 100L to null),
-                orthology.entrezToSymbolDetailed(listOf<Long>(1, 11, 100), Species.HUMAN)
-        )
-        assertEquals(
-                mapOf(1L to "2", 11L to "a", 100L to null),
-                orthology.entrezToSymbolDetailed(listOf<Long>(1, 11, 100), Species.MOUSE)
-        )
-        assertEquals(
-                mapOf(1L to "3", 11L to "a", 111L to null, 100L to null),
-                orthology.entrezToSymbolDetailed(listOf<Long>(1, 11, 111, 100), Species.RAT)
-        )
-    }
-
-    @Test
-    fun testSymbolToEntrezDetailed() {
-        assertEquals(
-                mapOf("1" to 1L, "A" to 11L, "non" to null),
-                orthology.symbolToEntrezDetailed(listOf("1", "A", "non"), Species.HUMAN)
-        )
-        assertEquals(
-                mapOf("1" to 2L, "A" to 22L, "non" to null),
-                orthology.symbolToEntrezDetailed(listOf("1", "A", "non"), Species.MOUSE)
-        )
-        assertEquals(
-                mapOf("1" to 3L, "A" to 33L, "111" to null, "non" to null),
-                orthology.symbolToEntrezDetailed(listOf("1", "A", "111", "non"), Species.RAT)
-        )
-    }
-
-    @Test
-    fun testSymbolToSymbolDetailed() {
-        assertEquals(
-                mapOf("1" to "1", "A" to "A", "non" to null),
-                orthology.symbolToSymbolDetailed(listOf("1", "A", "non"), Species.HUMAN)
-        )
-        assertEquals(
-                mapOf("1" to "2", "A" to "a", "non" to null),
-                orthology.symbolToSymbolDetailed(listOf("1", "A", "non"), Species.MOUSE)
-        )
-        assertEquals(
-                mapOf("1" to "3", "A" to "a", "111" to null, "non" to null),
-                orthology.symbolToSymbolDetailed(listOf("1", "A", "111", "non"), Species.RAT)
-        )
+        assertNull(orthology.getOrthologyByEntrez(100, Species.HUMAN))
+        assertNull(orthology.getOrthologyByEntrez(111, Species.RAT))
     }
 
     @Test
     fun testBulkConverting() {
-        assertEquals(listOf<Long>(1, 11), orthology.bulkEntrezToEntrez(listOf<Long>(1, 11, 100), Species.HUMAN))
-        assertEquals(listOf<Long>(2, 22), orthology.bulkEntrezToEntrez(listOf<Long>(1, 11, 100), Species.MOUSE))
-        assertEquals(listOf<Long>(3, 33), orthology.bulkEntrezToEntrez(listOf<Long>(1, 11, 111), Species.RAT))
+        assertEquals(mapOf(1L to 1L, 11L to 11L, 100L to null),
+                orthology.getOrthologyByEntrez(listOf<Long>(1, 11, 100), Species.HUMAN).mapValues { it.value?.entrezId ?: null })
+        assertEquals(mapOf(1L to "2", 11L to "a", 100L to null),
+            orthology.getOrthologyByEntrez(listOf<Long>(1, 11, 100), Species.MOUSE).mapValues { it.value?.symbolId ?: null })
+        assertEquals(mapOf(1L to 3L, 11L to 33L, 111L to null),
+                orthology.getOrthologyByEntrez(listOf<Long>(1, 11, 111), Species.RAT).mapValues { it.value?.entrezId ?: null })
+        assertEquals(mapOf(1L to "3", 11L to "a", 111L to null),
+            orthology.getOrthologyByEntrez(listOf<Long>(1, 11, 111), Species.RAT).mapValues { it.value?.symbolId ?: null })
 
-        assertEquals(listOf("1", "A"), orthology.bulkEntrezToSymbol(listOf<Long>(1, 11, 100), Species.HUMAN))
-        assertEquals(listOf("2", "a"), orthology.bulkEntrezToSymbol(listOf<Long>(1, 11, 100), Species.MOUSE))
-        assertEquals(listOf("3", "a"), orthology.bulkEntrezToSymbol(listOf<Long>(1, 11, 111), Species.RAT))
+        assertEquals(mapOf("1" to 1L, "A" to 11L, "non" to null),
+            orthology.getOrthologyBySymbol(listOf("1", "A", "non"), Species.HUMAN).mapValues { it.value?.entrezId ?: null })
+        assertEquals(mapOf("1" to "2", "A" to "a", "non" to null),
+            orthology.getOrthologyBySymbol(listOf("1", "A", "non"), Species.MOUSE).mapValues { it.value?.symbolId ?: null })
+        assertEquals(mapOf("1" to 3L, "A" to 33L, "111" to null, "non" to null),
+            orthology.getOrthologyBySymbol(listOf("1", "A", "111", "non"), Species.RAT).mapValues { it.value?.entrezId ?: null })
 
-        assertEquals(listOf(1L, 11L), orthology.bulkSymbolToEntrez(listOf("1", "A", "non"), Species.HUMAN))
-        assertEquals(listOf(2L, 22L), orthology.bulkSymbolToEntrez(listOf("1", "A", "non"), Species.MOUSE))
-        assertEquals(listOf(3L, 33L), orthology.bulkSymbolToEntrez(listOf("1", "A", "111", "non"), Species.RAT))
+        assertEquals(mapOf("r1" to 3L, "r11" to 33L, "r111" to null, "non" to null),
+                orthology.getOrthologyByRefseq(listOf("r1", "r11", "r111", "non"), Species.RAT).mapValues { it.value?.entrezId ?: null })
 
-        assertEquals(listOf("1", "A"), orthology.bulkSymbolToSymbol(listOf("1", "A", "non"), Species.HUMAN))
-        assertEquals(listOf("2", "a"), orthology.bulkSymbolToSymbol(listOf("1", "A", "non"), Species.MOUSE))
-        assertEquals(listOf("3", "a"), orthology.bulkSymbolToSymbol(listOf("1", "A", "111", "non"), Species.RAT))
     }
 }
