@@ -1,5 +1,6 @@
 package gq.core.genes
 
+import gq.core.crossLinkMaps
 import gq.core.data.Species
 import java.io.File
 
@@ -20,11 +21,11 @@ abstract class FromGeneToGeneConverter<TFrom, TTo : Any, TCurrent : FromGeneToGe
     operator fun get(species: Species, fromId: TFrom) = fromToMapping[species]!![fromId]
 
     fun convert(species: Species, fromId: TFrom) = get(species, fromId)
-    fun convert(species: Species, fromIds: Iterable<TFrom>) = convertDetailed(species, fromIds).mapNotNull { it.value }.toSet()
+    fun convert(species: Species, fromIds: Iterable<TFrom>) = convertDetailed(species, fromIds).values.filterNotNull().toSet()
 
-    fun convertDetailed(species: Species, entrezIds: Iterable<TFrom>): Map<TFrom, TTo?> {
+    fun convertDetailed(species: Species, geneIds: Iterable<TFrom>): Map<TFrom, TTo?> {
         val currentMapping = fromToMapping[species]!!
-        return entrezIds.associate { Pair(it, currentMapping[it]) }
+        return geneIds.associate { Pair(it, currentMapping[it]) }
     }
 
 }
@@ -42,13 +43,16 @@ class ToEntrezConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList()
         return this
     }
 
+    /**
+     * Normalize genes of *any* format and convert them to *entrez*.
+     */
     fun normalizeAndConvert(species: Species,
                             geneIds: List<String>,
                             format: GeneFormat = GeneFormat.guess(geneIds)): Map<String, Long?> {
         if (format == GeneFormat.ENTREZ) return geneIds.associate { Pair(it, it.toLong()) }
         val originalToNorm = format.mapToNormalized(geneIds)
         val normToEntrez = convertDetailed(species, originalToNorm.values)
-        return geneIds.associateBy({ it }, { normToEntrez[originalToNorm[it]] })
+        return crossLinkMaps(originalToNorm, normToEntrez)
     }
 }
 
@@ -88,15 +92,110 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
     fun getOrthologyByRefseq(refseqId: String, speciesTo: Species) = refseqToOrthology[refseqId]?.get(speciesTo)
 
     fun getOrthologyByEntrez(entrezIds: Iterable<Long>, speciesTo: Species) =
-            entrezIds.associate { Pair(it, getOrthologyByEntrez(it, speciesTo)) }
+            entrezIds.associate { Pair(it, getOrthologyByEntrez(it , speciesTo)) }
     fun getOrthologyBySymbol(symbolIds: Iterable<String>, speciesTo: Species) =
             symbolIds.associate { Pair(it, getOrthologyBySymbol(it, speciesTo)) }
     fun getOrthologyByRefseq(refseqIds: Iterable<String>, speciesTo: Species) =
             refseqIds.associate { Pair(it, getOrthologyByRefseq(it, speciesTo)) }
+
+    fun getOrthology(geneIds: List<String>, speciesTo: Species, format: GeneFormat = GeneFormat.guess(geneIds)) =
+            when(format) {
+                // TODO create SubEnum for this purpose
+                GeneFormat.ENSEMBL ->
+                    throw IllegalArgumentException("Orthology mapping contains SYMBOL, ENTREZ and REFSEQ formats only. ENSEMBL passed.")
+                GeneFormat.ENTREZ -> {
+                    val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
+                    crossLinkMaps(strToLongEntrez,getOrthologyByEntrez(strToLongEntrez.values, speciesTo))
+                }
+                GeneFormat.REFSEQ -> getOrthologyByRefseq(geneIds, speciesTo)
+                GeneFormat.SYMBOL -> getOrthologyBySymbol(geneIds, speciesTo)
+            }
 }
 
 
-fun File.readGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
+class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
+                     private val fromEntrezToSymbolConverter: FromEntrezToSymbolConverter,
+                     private val orthologyConverter: GeneOrthologyConverter) {
+
+    fun toEntrez(geneIds: List<String>,
+                 formatFrom: GeneFormat,
+                 speciesFrom: Species,
+                 speciesTo: Species = speciesFrom): Map<String, Long?> {
+        if (geneIds.isEmpty()) return emptyMap()
+        if (speciesTo == speciesFrom) return toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
+        return when(formatFrom) {
+            GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> {
+                val ensemblToOriginalEntrez = toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
+                val entrezOriginalToTarget = orthologyConverter.getOrthologyByEntrez(
+                        ensemblToOriginalEntrez.values.filterNotNull(), speciesTo).mapValues { it.value?.entrezId }
+                crossLinkMaps(ensemblToOriginalEntrez, entrezOriginalToTarget)
+            }
+            GeneFormat.ENTREZ -> {
+                val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
+                val longEntrezToTargetEntrez = toEntrez(
+                        strToLongEntrez.values.toList(),
+                        speciesFrom,
+                        speciesTo)
+                crossLinkMaps(strToLongEntrez, longEntrezToTargetEntrez)
+            }
+            GeneFormat.SYMBOL -> orthologyConverter.getOrthologyBySymbol(geneIds, speciesTo).mapValues { it.value?.entrezId }
+        }
+    }
+
+    fun toEntrez(entrezIds: List<Long>,
+                 speciesFrom: Species,
+                 speciesTo: Species = speciesFrom): Map<Long, Long?> {
+        if (entrezIds.isEmpty()) return emptyMap()
+        if (speciesTo == speciesFrom) return entrezIds.associate { Pair(it, it) }
+        return orthologyConverter.getOrthologyByEntrez(entrezIds, speciesTo).mapValues { it.value?.entrezId }
+    }
+
+    fun toSymbol(geneIds: List<String>,
+                 formatFrom: GeneFormat = GeneFormat.guess(geneIds),
+                 speciesFrom: Species,
+                 speciesTo: Species = speciesFrom): Map<String, String?> {
+        if (geneIds.isEmpty()) return emptyMap()
+
+        if (speciesTo == speciesFrom) {
+            if (formatFrom == GeneFormat.SYMBOL) return geneIds.associate { Pair(it, GeneFormat.SYMBOL.normalize(it)) }
+            val originalToEntrezIds = toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
+            val entrezToSymbol = fromEntrezToSymbolConverter.convertDetailed(
+                    speciesFrom, originalToEntrezIds.values.filterNotNull())
+            return crossLinkMaps(originalToEntrezIds, entrezToSymbol)
+        }
+
+        return when(formatFrom) {
+            GeneFormat.ENTREZ -> {
+                val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
+                crossLinkMaps(strToLongEntrez, toSymbol(strToLongEntrez.values.toList(), speciesFrom, speciesTo))
+            }
+            else -> {
+                val normalizedIds = formatFrom.mapToNormalized(geneIds).values.toList()
+                val normalizedToOrthology = when(formatFrom) {
+                    GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> {
+                        val normalizedToEntrez = toEntrezConverter.convertDetailed(speciesFrom, normalizedIds)
+                        crossLinkMaps(
+                                normalizedToEntrez,
+                                orthologyConverter.getOrthologyByEntrez(normalizedToEntrez.values.filterNotNull(), speciesTo))
+                    }
+                    else -> orthologyConverter.getOrthology(normalizedIds, speciesTo, formatFrom)
+                }
+                geneIds.associate { Pair(it, formatFrom.normalize(it)) }.mapValues { normalizedToOrthology[it.value]?.symbolId }
+            }
+        }
+    }
+
+    fun toSymbol(entrezIds: List<Long>,
+                 speciesFrom: Species,
+                 speciesTo: Species = speciesFrom): Map<Long, String?> {
+        if (entrezIds.isEmpty()) return emptyMap()
+        if (speciesFrom == speciesTo) return fromEntrezToSymbolConverter.convertDetailed(speciesFrom, entrezIds)
+        return orthologyConverter.getOrthologyByEntrez(entrezIds, speciesTo).mapValues { it.value?.symbolId }
+    }
+}
+
+
+fun File.readAndNormalizeGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
     if (it.isNotEmpty()) {
         val (groupId, species, entrez, symbol, refseq) = it.split("\t")
         OrthologyMapping(

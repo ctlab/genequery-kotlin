@@ -31,9 +31,6 @@ enum class GeneFormat(val formatName: String) {
         internal val ENSEMBL_PREFIXES = arrayOf("ENSG", "ENSRNOG", "ENSMUSG")
         internal val digitsAndDotRegex = Regex("\\d+(\\.?\\d+)?")
 
-        val d = Int::class
-
-
         fun guess(gene: String): GeneFormat {
             require(gene.isNotBlank(), { "Empty string passed." })
             values().forEach { if (it.isFormatOf(gene)) return it }

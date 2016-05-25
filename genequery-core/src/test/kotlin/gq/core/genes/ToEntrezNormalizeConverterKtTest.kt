@@ -8,18 +8,8 @@ import java.io.File
 import java.nio.file.Paths
 
 class ToEntrezNormalizeConverterKtTest {
-    companion object {
-        val converter = ToEntrezConverter()
-                .populate { readMappings("refseq-to-entrez.txt", GeneFormat.REFSEQ) }
-                .populate { readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL) }
-                .populate { readMappings("ensembl-to-entrez.txt", GeneFormat.ENSEMBL) }
-
-        fun getPath(fileName: String) = Paths.get(
-                Thread.currentThread().contextClassLoader.getResource("converter").path.toString(),
-                fileName).toString()
-
-        fun readMappings(fileName: String, geneFormat: GeneFormat) = File(getPath(fileName)).readAndNormalizeGeneMappings(geneFormat)
-
+    companion object : ConverterCompanionTestBase() {
+        val converter = createToEntrezConverter()
         fun mapOfToLong(vararg pairs: Pair<String, Int?>) = mapOf(*pairs).mapValues { it.value?.toLong() ?: null }
     }
 

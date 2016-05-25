@@ -74,4 +74,14 @@ class GeneOrthologyConverterTest {
                 orthology.getOrthologyByRefseq(listOf("r1", "r11", "r111", "non"), Species.RAT).mapValues { it.value?.entrezId ?: null })
 
     }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testGetOrthologyFail1() {
+        orthology.getOrthology(listOf("ENSG00000165029"), Species.HUMAN)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testGetOrthologyFail2() {
+        orthology.getOrthology(listOf("Abc"), Species.HUMAN, GeneFormat.ENSEMBL)
+    }
 }
