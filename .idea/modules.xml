@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/genequery-core/genequery-core.iml" filepath="$PROJECT_DIR$/genequery-core/genequery-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/genequery-kotlin.iml" filepath="$PROJECT_DIR$/genequery-kotlin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/genequery-rest/genequery-rest.iml" filepath="$PROJECT_DIR$/genequery-rest/genequery-rest.iml" />
     </modules>
   </component>
 </project>

@@ -5,7 +5,6 @@ apply plugin: 'kotlin'
 
 dependencies {
     compile libraries.kotlin
-    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
     testCompile libraries.test_kotlin
     testCompile libraries.junit
 }

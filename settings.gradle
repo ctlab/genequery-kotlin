@@ -1,3 +1,4 @@
 rootProject.name = 'genequery-kotlin'
 include 'genequery-core'
+include 'genequery-rest'
 

@@ -6,7 +6,22 @@ import java.io.File
 
 data class GeneMapping(val species: Species, val entrezId: Long, val otherId: String)
 
-abstract class FromGeneToGeneConverter<TFrom, TTo : Any, TCurrent : FromGeneToGeneConverter<TFrom, TTo, TCurrent>>(
+
+fun File.readAndNormalizeGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
+    if (it.isNotEmpty()) {
+        val (groupId, species, entrez, symbol, refseq) = it.split("\t")
+        OrthologyMapping(
+                groupId.toInt(),
+                Species.fromOriginal(species),
+                entrez.toLong(),
+                GeneFormat.SYMBOL.normalize(symbol),
+                GeneFormat.REFSEQ.normalize(refseq))
+    } else {
+        null
+    }
+}
+
+abstract class FromGeneToGeneConverter<TFrom, TTo : Any, TSelf : FromGeneToGeneConverter<TFrom, TTo, TSelf>>(
         mappings: Iterable<GeneMapping> = emptyList()) {
     protected  val fromToMapping = hashMapOf<Species, Map<TFrom, TTo>>()
 
@@ -14,7 +29,7 @@ abstract class FromGeneToGeneConverter<TFrom, TTo : Any, TCurrent : FromGeneToGe
         populate(mappings)
     }
 
-    abstract fun populate(initMappings: Iterable<GeneMapping>): TCurrent
+    abstract fun populate(initMappings: Iterable<GeneMapping>): TSelf
 
     inline fun populate(initMappingsFunc: () -> Iterable<GeneMapping>) = populate(initMappingsFunc())
 
@@ -76,6 +91,20 @@ data class OrthologyMapping(val groupId: Int,
                             val entrezId: Long,
                             val symbolId: String,
                             val refseqId: String)
+
+
+fun File.readAndNormalizeGeneMappings(otherGeneFormat: GeneFormat): Iterable<GeneMapping> = readLines().mapNotNull {
+    if (it.isNotEmpty()) {
+        val (species, entrez, other) = it.split("\t")
+        GeneMapping(
+                Species.fromOriginal(species),
+                entrez.toLong(),
+                otherGeneFormat.normalize(other))
+    } else {
+        null
+    }
+}
+
 
 class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
     private val groupIdToOrthology = orthologyMappings
@@ -191,33 +220,5 @@ class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
         if (entrezIds.isEmpty()) return emptyMap()
         if (speciesFrom == speciesTo) return fromEntrezToSymbolConverter.convertDetailed(speciesFrom, entrezIds)
         return orthologyConverter.getOrthologyByEntrez(entrezIds, speciesTo).mapValues { it.value?.symbolId }
-    }
-}
-
-
-fun File.readAndNormalizeGeneOrthologyMappings(): Iterable<OrthologyMapping> = readLines().mapNotNull {
-    if (it.isNotEmpty()) {
-        val (groupId, species, entrez, symbol, refseq) = it.split("\t")
-        OrthologyMapping(
-                groupId.toInt(),
-                Species.fromOriginal(species),
-                entrez.toLong(),
-                GeneFormat.SYMBOL.normalize(symbol),
-                GeneFormat.REFSEQ.normalize(refseq))
-    } else {
-        null
-    }
-}
-
-
-fun File.readAndNormalizeGeneMappings(otherGeneFormat: GeneFormat): Iterable<GeneMapping> = readLines().mapNotNull {
-    if (it.isNotEmpty()) {
-        val (species, entrez, other) = it.split("\t")
-        GeneMapping(
-                Species.fromOriginal(species),
-                entrez.toLong(),
-                otherGeneFormat.normalize(other))
-    } else {
-        null
     }
 }
