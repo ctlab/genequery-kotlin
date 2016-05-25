@@ -5,14 +5,15 @@ import java.io.File
 
 data class GeneMapping(val species: Species, val entrezId: Long, val otherId: String)
 
-abstract class FromGeneToGeneConverter<TFrom, TTo : Any>(mappings: Iterable<GeneMapping> = emptyList()) {
+abstract class FromGeneToGeneConverter<TFrom, TTo : Any, TCurrent : FromGeneToGeneConverter<TFrom, TTo, TCurrent>>(
+        mappings: Iterable<GeneMapping> = emptyList()) {
     protected  val fromToMapping = hashMapOf<Species, Map<TFrom, TTo>>()
 
     init {
         populate(mappings)
     }
 
-    abstract fun populate(initMappings: Iterable<GeneMapping>): FromGeneToGeneConverter<TFrom, TTo>
+    abstract fun populate(initMappings: Iterable<GeneMapping>): TCurrent
 
     inline fun populate(initMappingsFunc: () -> Iterable<GeneMapping>) = populate(initMappingsFunc())
 
@@ -29,7 +30,7 @@ abstract class FromGeneToGeneConverter<TFrom, TTo : Any>(mappings: Iterable<Gene
 }
 
 class ToEntrezConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList())
-: FromGeneToGeneConverter<String, Long>(entrezOtherMappings) {
+: FromGeneToGeneConverter<String, Long, ToEntrezConverter>(entrezOtherMappings) {
     override fun populate(initMappings: Iterable<GeneMapping>): ToEntrezConverter {
         val newSpeciesToOtherToEntrez = initMappings
                 .groupBy { it.species }
@@ -40,10 +41,19 @@ class ToEntrezConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList()
                 .forEach { fromToMapping.merge(it.key, it.value, { existing, new -> existing + new }) }
         return this
     }
+
+    fun normalizeAndConvert(species: Species,
+                            geneIds: List<String>,
+                            format: GeneFormat = GeneFormat.guess(geneIds)): Map<String, Long?> {
+        if (format == GeneFormat.ENTREZ) return geneIds.associate { Pair(it, it.toLong()) }
+        val originalToNorm = format.mapToNormalized(geneIds)
+        val normToEntrez = convertDetailed(species, originalToNorm.values)
+        return geneIds.associateBy({ it }, { normToEntrez[originalToNorm[it]] })
+    }
 }
 
 class FromEntrezToSymbolConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList())
-: FromGeneToGeneConverter<Long, String>(entrezOtherMappings) {
+: FromGeneToGeneConverter<Long, String, FromEntrezToSymbolConverter>(entrezOtherMappings) {
     override fun populate(initMappings: Iterable<GeneMapping>): FromEntrezToSymbolConverter {
         val newSpeciesToEntrezToSymbol = initMappings
                 .groupBy { it.species }

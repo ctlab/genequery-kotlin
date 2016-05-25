@@ -23,6 +23,7 @@ class FormatTest {
         assertEquals(GeneFormat.ENSEMBL, GeneFormat.guess("ENSRNOG00000008187.3"))
         assertEquals(GeneFormat.SYMBOL, GeneFormat.guess("ENSRNOG00000008187.3.3"))
         assertEquals(GeneFormat.SYMBOL, GeneFormat.guess("ENSRNOG"))
+        assertEquals(GeneFormat.SYMBOL, GeneFormat.guess("Ensg00000120907"))
         assertEquals(GeneFormat.SYMBOL, GeneFormat.guess("ENSRNOG00DD"))
         assertEquals(GeneFormat.SYMBOL, GeneFormat.guess("ENSRNOG00DD.2"))
         assertEquals(GeneFormat.SYMBOL, GeneFormat.guess("ENSRNOG1e10"))

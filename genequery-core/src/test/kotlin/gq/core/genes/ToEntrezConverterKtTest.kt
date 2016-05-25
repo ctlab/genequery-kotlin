@@ -8,17 +8,18 @@ import java.io.File
 import java.nio.file.Paths
 
 class ToEntrezConverterKtTest {
+    companion object {
+        fun getPath(fileName: String) = Paths.get(
+                Thread.currentThread().contextClassLoader.getResource("converter").path.toString(),
+                fileName).toString()
 
-    fun getPath(fileName: String) = Paths.get(
-            Thread.currentThread().contextClassLoader.getResource("converter").path.toString(),
-            fileName).toString()
+        fun readMappings(fileName: String, geneFormat: GeneFormat) = File(getPath(fileName)).readAndNormalizeGeneMappings(geneFormat)
 
-    fun readMappings(fileName: String, geneFormat: GeneFormat) = File(getPath(fileName)).readAndNormalizeGeneMappings(geneFormat)
-
-    fun getToEntrezConverter() = ToEntrezConverter()
-            .populate { readMappings("refseq-to-entrez.txt", GeneFormat.REFSEQ) }
-            .populate { readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL) }
-            .populate { readMappings("ensembl-to-entrez.txt", GeneFormat.ENSEMBL) }
+        val converter = ToEntrezConverter()
+                .populate { readMappings("refseq-to-entrez.txt", GeneFormat.REFSEQ) }
+                .populate { readMappings("symbol-to-entrez.txt", GeneFormat.SYMBOL) }
+                .populate { readMappings("ensembl-to-entrez.txt", GeneFormat.ENSEMBL) }
+    }
 
     @Test
     fun testConvertOtherToEntrez() {
@@ -42,7 +43,6 @@ class ToEntrezConverterKtTest {
 
     @Test
     fun testConvertOtherToEntrez2() {
-        val converter = getToEntrezConverter()
         assertEquals(9L, converter[Species.HUMAN, "NM_001160175"])
         assertEquals(2L, converter[Species.HUMAN, "A2M"])
         assertEquals(26L, converter[Species.HUMAN, "DUPLICATE"])
@@ -59,7 +59,6 @@ class ToEntrezConverterKtTest {
 
     @Test
     fun testOtherToEntrezDetailed() {
-        val converter = getToEntrezConverter()
         val detailed = converter.convertDetailed(
                 Species.HUMAN,
                 listOf("NM_001160175", "A2M", "A2M", "ENSG00000175899", "not-a-gene", "DUPLICATE"))
@@ -74,7 +73,6 @@ class ToEntrezConverterKtTest {
 
     @Test
     fun testOtherToEntrez() {
-        val converter = getToEntrezConverter()
         val set = converter.convert(Species.HUMAN, listOf("NM_001160175", "A2M", "ENSG00000175899", "not-a-gene"))
         assertEquals(setOf(2L, 9L), set)
         assertTrue(converter.convert(Species.HUMAN, emptyList()).isEmpty())
