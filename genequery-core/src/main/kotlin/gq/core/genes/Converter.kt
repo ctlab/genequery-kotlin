@@ -109,7 +109,7 @@ fun File.readAndNormalizeGeneMappings(otherGeneFormat: GeneFormat): Iterable<Gen
 class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
     private val groupIdToOrthology = orthologyMappings
             .groupBy { it.groupId }
-            .mapValues { it.value.groupBy { it.species }.mapValues { it.value.single() } }
+            .mapValues { it.value.groupBy { it.species }.mapValues { it.value.minBy { it.entrezId } } }
     private val entrezToOrthology = orthologyMappings.associate { Pair(it.entrezId, groupIdToOrthology[it.groupId]!!) }
     private val symbolToOrthology = orthologyMappings.associate { Pair(it.symbolId, groupIdToOrthology[it.groupId]!!) }
     private val refseqToOrthology = orthologyMappings.associate { Pair(it.refseqId, groupIdToOrthology[it.groupId]!!) }
