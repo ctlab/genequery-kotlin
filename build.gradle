@@ -31,7 +31,7 @@ sourceSets {
 
 dependencies {
     compile libraries.kotlin
-    compile project(':genequery-core')
+    compile project(':core')
 }
 
 task wrapper(type: Wrapper) {
