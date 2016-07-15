@@ -44,7 +44,7 @@ fun LongArray.sizeOfIntersectionWithSorted(other: LongArray): Int {
 fun LongArray.sizeOfIntersectionWithSorted(other: List<Long>) = sizeOfIntersectionWithSorted(other.toLongArray())
 
 
-class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Species, entrezIds: LongArray) {
+open class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Species, entrezIds: LongArray) {
     init {
         require(entrezIds.isNotEmpty(), {"Empty entrezIds array"})
     }
