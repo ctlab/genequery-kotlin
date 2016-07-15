@@ -1,13 +1,10 @@
 package gq.rest.api
 
 import gq.rest.Application
-import gq.rest.RestControllerAdvice
-import gq.rest.services.GeneSetEnrichmentService
 import org.hamcrest.Matchers.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.SpringApplicationConfiguration
 import org.springframework.context.ApplicationContextInitializer
@@ -24,18 +21,18 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
 import java.nio.charset.Charset
 
 
 class PatchEnvPropsAppCtxInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-
     override fun initialize(applicationContext: ConfigurableApplicationContext) {
-        val pathToData = GeneSetEnrichmentControllerTest::class.java.classLoader.getResource("data/").path
+        // substitute empty path to data folder from properties for path to resource folder
+        val pathToTestData = GeneSetEnrichmentControllerTest::class.java.classLoader.getResource("data/").path
         applicationContext.environment.propertySources.addFirst(
-                MapPropertySource("test-properties", mapOf("gq.rest.data.path" to pathToData)))
+                MapPropertySource("test-properties", mapOf("gq.rest.data.path" to pathToTestData)))
     }
-
 }
 
 
@@ -48,14 +45,13 @@ class PatchEnvPropsAppCtxInitializer : ApplicationContextInitializer<Configurabl
 open class GeneSetEnrichmentControllerTest {
 
     @Autowired
-    lateinit var geneSetEnrichmentService: GeneSetEnrichmentService
+    lateinit var wac: WebApplicationContext
 
     lateinit var mockMvc: MockMvc
 
     @Before
     fun setup() {
-        mockMvc = standaloneSetup(gq.rest.api.GeneSetEnrichmentController(geneSetEnrichmentService)).
-                setControllerAdvice(RestControllerAdvice()).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
     }
 
     var mappingJackson2HttpMessageConverter: HttpMessageConverter<Any> = MappingJackson2HttpMessageConverter()
@@ -79,6 +75,7 @@ open class GeneSetEnrichmentControllerTest {
                 .andDo { handler ->
                     println(handler.response.contentAsString)
                 }
+                .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("entrez")))
                 .andExpect(jsonPath("$.result.geneConversionMap.494143", equalTo(494143)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(3)))
@@ -87,15 +84,65 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].intersectionSize", equalTo(55)))
     }
 
+    @Test
+    fun testBadSpecies() {
+        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        val queryGenes = listOf("494143", "390916")
+        requestForm.genes = queryGenes
+        requestForm.speciesFrom = "hs"
+        requestForm.speciesTo = "hss"
+
+        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
+                .andDo { handler ->
+                    println(handler.response.contentAsString)
+                }
+                .andExpect(status().is4xxClientError)
+                .andExpect(jsonPath("$.success", equalTo(false)))
+                .andExpect(jsonPath("$.result", nullValue()))
+                .andExpect(jsonPath("$.errors", hasSize<Int>(1)))
+                .andExpect(jsonPath("$.errors[0]", containsString("hss")))
+    }
+
+    @Test
+    fun testNoSpecies() {
+        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        val queryGenes = listOf("494143", "390916")
+        requestForm.genes = queryGenes
+        requestForm.speciesTo = "hs"
+
+        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
+                .andDo { handler ->
+                    println(handler.response.contentAsString)
+                }
+                .andExpect(status().is4xxClientError)
+                .andExpect(jsonPath("$.success", equalTo(false)))
+                .andExpect(jsonPath("$.result", nullValue()))
+                .andExpect(jsonPath("$.errors", hasSize<Int>(1)))
+                .andExpect(jsonPath("$.errors[0]", containsString("speciesFrom")))
+    }
+
+    @Test
+    fun testFewErrors() {
+        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        requestForm.genes = emptyList()
+        requestForm.speciesTo = "hss"
+
+        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
+                .andDo { handler ->
+                    println(handler.response.contentAsString)
+                }
+                .andExpect(status().is4xxClientError)
+                .andExpect(jsonPath("$.success", equalTo(false)))
+                .andExpect(jsonPath("$.result", nullValue()))
+                .andExpect(jsonPath("$.errors", hasSize<Int>(3)))
+                .andExpect(jsonPath("$.errors", hasItem(containsString("hss"))))
+                .andExpect(jsonPath("$.errors", hasItem(containsString("speciesFrom"))))
+                .andExpect(jsonPath("$.errors", hasItem(containsString("genes"))))
+    }
+
     fun json(o: Any): String {
         val outputMessage = MockHttpOutputMessage()
         mappingJackson2HttpMessageConverter.write(o, MediaType.APPLICATION_JSON, outputMessage);
         return outputMessage.bodyAsString;
     }
-
-    private fun <T> any(): T {
-        Mockito.any<T>()
-        return uninitialized()
-    }
-    private fun <T> uninitialized(): T = null as T
 }
