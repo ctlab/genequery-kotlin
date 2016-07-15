@@ -5,7 +5,7 @@ import org.springframework.core.env.Environment
 import java.nio.file.Paths
 
 open class GQRestProperties(env: Environment) {
-    var dataPath: String = env.getProperty("gq.rest.data.path", "")
+    var dataPath: String = env.getRequiredProperty("gq.rest.data.path")
     var adjPvalueMin: Double = env.getProperty("gq.rest.adjPvalueMin", "0.1").toDouble()
 
     fun pathToOrthology() = Paths.get(dataPath, "orthology.tsv").toString()
