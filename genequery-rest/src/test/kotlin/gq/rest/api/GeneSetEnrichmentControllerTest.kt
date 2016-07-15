@@ -18,6 +18,7 @@ import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -60,7 +61,7 @@ open class GeneSetEnrichmentControllerTest {
 
     @Test
     fun testBasicRequest() {
-        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
         val queryGenes = listOf("494143", "390916", "375444", "153527", "139341", "112495", "91947", "91942", "80762",
                 "80213", "79665", "64963", "64105", "55333", "55179", "51637", "51227", "51121", "29978", "27089",
                 "25939", "24137", "23014", "11345", "11137", "10196", "10159", "9367", "9338", "8697", "8533", "8487",
@@ -70,11 +71,8 @@ open class GeneSetEnrichmentControllerTest {
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
 
-        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
+        makeRequest(requestForm)
                 .andExpect(status().isOk)
-                .andDo { handler ->
-                    println(handler.response.contentAsString)
-                }
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("entrez")))
                 .andExpect(jsonPath("$.result.geneConversionMap.494143", equalTo(494143)))
@@ -86,16 +84,13 @@ open class GeneSetEnrichmentControllerTest {
 
     @Test
     fun testBadSpecies() {
-        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
         val queryGenes = listOf("494143", "390916")
         requestForm.genes = queryGenes
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hss"
 
-        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
-                .andDo { handler ->
-                    println(handler.response.contentAsString)
-                }
+        makeRequest(requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
@@ -104,16 +99,29 @@ open class GeneSetEnrichmentControllerTest {
     }
 
     @Test
+    fun testAmbiguousGenes() {
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
+        val queryGenes = listOf("494143", "Abc")
+        requestForm.genes = queryGenes
+        requestForm.speciesFrom = "hs"
+        requestForm.speciesTo = "hs"
+
+        makeRequest(requestForm)
+                .andExpect(status().is4xxClientError)
+                .andExpect(jsonPath("$.success", equalTo(false)))
+                .andExpect(jsonPath("$.result", nullValue()))
+                .andExpect(jsonPath("$.errors", hasSize<Int>(1)))
+                .andExpect(jsonPath("$.errors[0]", allOf(containsString("494143"), containsString("Abc"))))
+    }
+
+    @Test
     fun testNoSpecies() {
-        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
         val queryGenes = listOf("494143", "390916")
         requestForm.genes = queryGenes
         requestForm.speciesTo = "hs"
 
-        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
-                .andDo { handler ->
-                    println(handler.response.contentAsString)
-                }
+        makeRequest(requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
@@ -123,14 +131,11 @@ open class GeneSetEnrichmentControllerTest {
 
     @Test
     fun testFewErrors() {
-        val requestForm = gq.rest.api.GeneSetEnrichmentController.EnrichmentRequestForm()
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
         requestForm.genes = emptyList()
         requestForm.speciesTo = "hss"
 
-        mockMvc.perform(post("/perform-enrichment/").content(json(requestForm)).contentType(contentType))
-                .andDo { handler ->
-                    println(handler.response.contentAsString)
-                }
+        makeRequest(requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
@@ -140,7 +145,14 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.errors", hasItem(containsString("genes"))))
     }
 
-    fun json(o: Any): String {
+    private fun makeRequest(form: GeneSetEnrichmentController.EnrichmentRequestForm): ResultActions {
+        return mockMvc.perform(post(GeneSetEnrichmentController.URL).content(json(form)).contentType(contentType))
+                .andDo { handler ->
+                    println(handler.response.contentAsString)
+                }
+    }
+
+    private fun json(o: Any): String {
         val outputMessage = MockHttpOutputMessage()
         mappingJackson2HttpMessageConverter.write(o, MediaType.APPLICATION_JSON, outputMessage);
         return outputMessage.bodyAsString;

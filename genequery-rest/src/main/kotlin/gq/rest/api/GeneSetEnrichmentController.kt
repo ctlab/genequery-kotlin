@@ -12,17 +12,19 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
 
 
-@RestController("/perform-enrichment")
+@RestController(GeneSetEnrichmentController.URL)
 open class GeneSetEnrichmentController @Autowired constructor(val geneSetEnrichmentService: GeneSetEnrichmentService) {
+
+    companion object {
+        val LOG = Logger.getLogger(GeneSetEnrichmentController::class.java)
+        const val URL = "/perform-enrichment"
+
+    }
 
     class EnrichmentRequestForm {
         var genes: List<String>? = null
         var speciesFrom: String? = null
         var speciesTo: String? = null
-    }
-
-    companion object {
-        val LOG = Logger.getLogger(GeneSetEnrichmentController::class.java)
     }
 
     @InitBinder
