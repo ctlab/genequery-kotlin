@@ -30,7 +30,7 @@ open class OverlapService @Autowired constructor(
         }
     }
 
-    open fun getModule(moduleName: String) : GQModule {
+    open fun getModule(moduleName: String): GQModule {
         val module = gqDataRepository.moduleCollection.fullNameToGQModule[GQModule.parseFullModuleName(moduleName)]
         if (module != null) {
             return module

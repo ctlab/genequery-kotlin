@@ -1,11 +1,8 @@
 package gq.core.genes
 
 import gq.core.data.Species
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
-import java.io.File
-import java.nio.file.Paths
 
 class ToEntrezNormalizeConverterKtTest {
     companion object : ConverterCompanionTestBase() {

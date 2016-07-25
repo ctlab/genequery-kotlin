@@ -1,6 +1,6 @@
 package gq.core.genes
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class FormatTest {

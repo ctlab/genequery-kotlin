@@ -17,6 +17,7 @@ class GQDataRepository @Autowired constructor(private val gqRestProperties: GQRe
     companion object {
         val LOG = Logger.getLogger(GQDataRepository::class.java)
     }
+
     val toEntrezConverter = ToEntrezConverter().populate {
         LOG.info("Populate gene converter to-entrez from ${gqRestProperties.pathEnsemblToEntrez()}")
         File(gqRestProperties.pathEnsemblToEntrez()).readAndNormalizeGeneMappings(GeneFormat.ENSEMBL)
