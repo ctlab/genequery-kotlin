@@ -21,8 +21,8 @@ open class GeneSetEnrichmentService @Autowired constructor(
         private val gqDataRepository: GQDataRepository) {
 
     open fun convertGenes(rawGenes: List<String>,
-                     speciesFrom: Species,
-                     speciesTo: Species = speciesFrom): Pair<GeneFormat, Map<String, Long?>> {
+                          speciesFrom: Species,
+                          speciesTo: Species = speciesFrom): Pair<GeneFormat, Map<String, Long?>> {
         try {
             val currentGeneFormat = GeneFormat.guess(rawGenes)
             return Pair(
@@ -34,8 +34,8 @@ open class GeneSetEnrichmentService @Autowired constructor(
     }
 
     open fun findEnrichedModules(rawGenes: List<String>,
-                            speciesFrom: Species,
-                            speciesTo: Species = speciesFrom): EnrichmentResponse {
+                                 speciesFrom: Species,
+                                 speciesTo: Species = speciesFrom): EnrichmentResponse {
         val (identifiedGeneFormat, conversionMap) = convertGenes(rawGenes, speciesFrom, speciesTo)
 
         val entrezIds = conversionMap.values.filterNotNull()

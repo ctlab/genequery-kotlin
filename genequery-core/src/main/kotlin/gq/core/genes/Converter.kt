@@ -23,7 +23,7 @@ fun File.readAndNormalizeGeneOrthologyMappings(): Iterable<OrthologyMapping> = r
 
 abstract class FromGeneToGeneConverter<TFrom, TTo : Any, TSelf : FromGeneToGeneConverter<TFrom, TTo, TSelf>>(
         mappings: Iterable<GeneMapping> = emptyList()) {
-    protected  val fromToMapping = hashMapOf<Species, Map<TFrom, TTo>>()
+    protected val fromToMapping = hashMapOf<Species, Map<TFrom, TTo>>()
 
     init {
         populate(mappings)
@@ -121,20 +121,22 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
     fun getOrthologyByRefseq(refseqId: String, speciesTo: Species) = refseqToOrthology[refseqId]?.get(speciesTo)
 
     fun getOrthologyByEntrez(entrezIds: Iterable<Long>, speciesTo: Species) =
-            entrezIds.associate { Pair(it, getOrthologyByEntrez(it , speciesTo)) }
+            entrezIds.associate { Pair(it, getOrthologyByEntrez(it, speciesTo)) }
+
     fun getOrthologyBySymbol(symbolIds: Iterable<String>, speciesTo: Species) =
             symbolIds.associate { Pair(it, getOrthologyBySymbol(it, speciesTo)) }
+
     fun getOrthologyByRefseq(refseqIds: Iterable<String>, speciesTo: Species) =
             refseqIds.associate { Pair(it, getOrthologyByRefseq(it, speciesTo)) }
 
     fun getOrthology(geneIds: List<String>, speciesTo: Species, format: GeneFormat = GeneFormat.guess(geneIds)) =
-            when(format) {
-                // TODO create SubEnum for this purpose
+            when (format) {
+            // TODO create SubEnum for this purpose
                 GeneFormat.ENSEMBL ->
                     throw IllegalArgumentException("Orthology mapping contains SYMBOL, ENTREZ and REFSEQ formats only. ENSEMBL passed.")
                 GeneFormat.ENTREZ -> {
                     val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
-                    crossLinkMaps(strToLongEntrez,getOrthologyByEntrez(strToLongEntrez.values, speciesTo))
+                    crossLinkMaps(strToLongEntrez, getOrthologyByEntrez(strToLongEntrez.values, speciesTo))
                 }
                 GeneFormat.REFSEQ -> getOrthologyByRefseq(geneIds, speciesTo)
                 GeneFormat.SYMBOL -> getOrthologyBySymbol(geneIds, speciesTo)
@@ -152,7 +154,7 @@ class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
                  speciesTo: Species = speciesFrom): Map<String, Long?> {
         if (geneIds.isEmpty()) return emptyMap()
         if (speciesTo == speciesFrom) return toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
-        return when(formatFrom) {
+        return when (formatFrom) {
             GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> {
                 val ensemblToOriginalEntrez = toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
                 val entrezOriginalToTarget = orthologyConverter.getOrthologyByEntrez(
@@ -193,14 +195,14 @@ class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
             return crossLinkMaps(originalToEntrezIds, entrezToSymbol)
         }
 
-        return when(formatFrom) {
+        return when (formatFrom) {
             GeneFormat.ENTREZ -> {
                 val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
                 crossLinkMaps(strToLongEntrez, toSymbol(strToLongEntrez.values.toList(), speciesFrom, speciesTo))
             }
             else -> {
                 val normalizedIds = formatFrom.mapToNormalized(geneIds).values.toList()
-                val normalizedToOrthology = when(formatFrom) {
+                val normalizedToOrthology = when (formatFrom) {
                     GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> {
                         val normalizedToEntrez = toEntrezConverter.convertDetailed(speciesFrom, normalizedIds)
                         crossLinkMaps(

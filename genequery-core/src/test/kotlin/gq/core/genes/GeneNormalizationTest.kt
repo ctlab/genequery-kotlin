@@ -1,8 +1,7 @@
 package gq.core.genes
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 class GeneNormalizationTest {
 

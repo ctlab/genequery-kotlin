@@ -8,13 +8,13 @@ infix fun LongArray.intersectWithSorted(other: LongArray): LongArray {
 
     while (thisIndex < size && otherIndex < other.size) {
         if (this[thisIndex] == other[otherIndex]) {
-            result.add(this[thisIndex]);
-            thisIndex++;
-            otherIndex++;
+            result.add(this[thisIndex])
+            thisIndex++
+            otherIndex++
         } else if (this[thisIndex] > other[otherIndex]) {
-            otherIndex++;
+            otherIndex++
         } else {
-            thisIndex++;
+            thisIndex++
         }
     }
     return result.toLongArray()
@@ -29,12 +29,12 @@ fun LongArray.sizeOfIntersectionWithSorted(other: LongArray): Int {
     while (thisIndex < size && otherIndex < other.size) {
         if (this[thisIndex] == other[otherIndex]) {
             result++
-            thisIndex++;
-            otherIndex++;
+            thisIndex++
+            otherIndex++
         } else if (this[thisIndex] > other[otherIndex]) {
-            otherIndex++;
+            otherIndex++
         } else {
-            thisIndex++;
+            thisIndex++
         }
     }
     return result
@@ -46,7 +46,7 @@ fun LongArray.sizeOfIntersectionWithSorted(other: List<Long>) = sizeOfIntersecti
 
 open class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Species, entrezIds: LongArray) {
     init {
-        require(entrezIds.isNotEmpty(), {"Empty entrezIds array"})
+        require(entrezIds.isNotEmpty(), { "Empty entrezIds array" })
     }
 
     val sortedEntrezIds = entrezIds.sorted().toLongArray()
@@ -58,7 +58,7 @@ open class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Sp
 
         fun parseFullModuleName(fullName: String): Triple<Int, Int, Int> {
             val parts = fullName.split('_', '#')
-            require(parts.size == 3, {"full module name $fullName has bad format"})
+            require(parts.size == 3, { "full module name $fullName has bad format" })
             require(parts.component1().startsWith(GSE_PREFIX))
             require(parts.component2().startsWith(GPL_PREFIX))
             return Triple(

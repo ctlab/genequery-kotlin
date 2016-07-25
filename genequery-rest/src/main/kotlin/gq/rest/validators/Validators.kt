@@ -50,7 +50,7 @@ class EnrichmentRequestFormValidator : Validator {
         val enrichmentRequestForm = target as GeneSetEnrichmentController.EnrichmentRequestForm
         val speciesValidator = SpeciesValidator()
 
-        if(validateIsNotNullAndNotBlank(enrichmentRequestForm.speciesFrom, errors, "speciesFrom")) {
+        if (validateIsNotNullAndNotBlank(enrichmentRequestForm.speciesFrom, errors, "speciesFrom")) {
             ValidationUtils.invokeValidator(speciesValidator, enrichmentRequestForm.speciesFrom, errors)
         }
         if (validateIsNotNullAndNotBlank(enrichmentRequestForm.speciesTo, errors, "speciesTo")) {
@@ -69,7 +69,7 @@ class OverlapRequestFormValidator : Validator {
         val overlapRequestForm = target as OverlapController.OverlapRequestForm
         val speciesValidator = SpeciesValidator()
 
-        if(validateIsNotNullAndNotBlank(overlapRequestForm.speciesFrom, errors, "speciesFrom")) {
+        if (validateIsNotNullAndNotBlank(overlapRequestForm.speciesFrom, errors, "speciesFrom")) {
             ValidationUtils.invokeValidator(speciesValidator, overlapRequestForm.speciesFrom, errors)
         }
         if (validateIsNotNullAndNotBlank(overlapRequestForm.speciesTo, errors, "speciesTo")) {
@@ -81,5 +81,6 @@ class OverlapRequestFormValidator : Validator {
         //TODO: probably should validate it the same way we validate speciesFrom and speciesTo
         validateIsNotNullAndNotBlank(overlapRequestForm.moduleName, errors, "moduleName")
     }
+
     override fun supports(clazz: Class<*>?) = OverlapController.OverlapRequestForm::class.java.equals(clazz)
 }

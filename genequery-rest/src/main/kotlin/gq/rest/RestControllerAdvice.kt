@@ -52,10 +52,10 @@ class RestControllerAdvice : ResponseBodyAdvice<Any?> {
                                  selectedConverterType: Class<out HttpMessageConverter<*>>?,
                                  request: ServerHttpRequest?,
                                  response: ServerHttpResponse?): ResponseEnvelope {
-        return if (body is ResponseEnvelope) body else ResponseEnvelope(body);
+        return if (body is ResponseEnvelope) body else ResponseEnvelope(body)
     }
 
-//    // https://github.com/arawn/kotlin-spring-example/blob/master/src/main/kotlin/org/ksug/forum/web/support/ErrorResponse.kt
+    //    // https://github.com/arawn/kotlin-spring-example/blob/master/src/main/kotlin/org/ksug/forum/web/support/ErrorResponse.kt
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BadRequestException::class)
     fun handleBadRequestException(e: BadRequestException): ErrorResponseEntity {
