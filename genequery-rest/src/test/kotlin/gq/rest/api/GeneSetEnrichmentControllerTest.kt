@@ -60,7 +60,7 @@ open class GeneSetEnrichmentControllerTest {
     val contentType = MediaType(MediaType.APPLICATION_JSON.type, MediaType.APPLICATION_JSON.subtype, Charset.forName("utf8"));
 
     @Test
-    fun testBasicRequest() {
+    fun testBasicRequestSameSpeciesEntrezToEntrez() {
         val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
         val queryGenes = listOf("494143", "390916", "375444", "153527", "139341", "112495", "91947", "91942", "80762",
                 "80213", "79665", "64963", "64105", "55333", "55179", "51637", "51227", "51121", "29978", "27089",
@@ -80,6 +80,25 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].gse", equalTo(10021)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].logAdjPvalue", closeTo(-131.88785323, 1e-5)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].intersectionSize", equalTo(55)))
+    }
+
+    @Test
+    fun testBasicRequestDifferentSpeciesSymbolToEntrez() {
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
+        val queryGenes = listOf("ACADM", "Acadvl", "ACAT1", "ACVR1", "SGCA", "ADSL", "aasdf")
+        requestForm.genes = queryGenes
+        requestForm.speciesFrom = "hs"
+        requestForm.speciesTo = "mm"
+
+        makeRequest(requestForm)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.success", equalTo(true)))
+                .andExpect(jsonPath("$.errors", nullValue()))
+                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("symbol")))
+                .andExpect(jsonPath("$.result.geneConversionMap.ADSL", equalTo(11564)))
+                .andExpect(jsonPath("$.result.geneConversionMap.aasdf", nullValue()))
+                .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(1)))
+                .andExpect(jsonPath("$.result.enrichmentResultItems[0].moduleNumber", equalTo(6)))
     }
 
     @Test
