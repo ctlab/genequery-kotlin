@@ -57,8 +57,6 @@ open class OverlapControllerTest {
         makeRequest(requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("entrez")))
-                .andExpect(jsonPath("$.result.geneConversionMap.440915", equalTo(440915)))
                 .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(4)))
     }
 
@@ -77,8 +75,6 @@ open class OverlapControllerTest {
         makeRequest(requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("entrez")))
-                .andExpect(jsonPath("$.result.geneConversionMap.440915", equalTo(440915)))
                 .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(queryGenes.size)))
     }
 
@@ -93,8 +89,6 @@ open class OverlapControllerTest {
         makeRequest(requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("entrez")))
-                .andExpect(jsonPath("$.result.geneConversionMap.42", equalTo(42)))
                 .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(0)))
     }
 
