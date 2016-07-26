@@ -5,11 +5,15 @@ import java.io.File
 fun populateModulesFromGmt(path: String, species: Species, dest: MutableList<GQModule>) {
     File(path).forEachLine {
         if (it.isNotEmpty()) {
-            val (fullName, commaSepEntrezIds) = it.split("\t");
-            dest.add(GQModule.buildByFullName(
-                    fullName,
-                    species,
-                    commaSepEntrezIds.split(',').map { it.toLong() }.toLongArray()))
+            try {
+                val (fullName, commaSepEntrezIds) = it.split("\t");
+                dest.add(GQModule.buildByFullName(
+                        fullName,
+                        species,
+                        commaSepEntrezIds.split(',').map { it.toLong() }.toLongArray()))
+            } catch(e: Exception) {
+                throw RuntimeException("Fail in parsing GMT line: $it", e)
+            }
         }
     }
 }
