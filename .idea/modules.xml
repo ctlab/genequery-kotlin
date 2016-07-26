@@ -2,9 +2,18 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery-core/core.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery-core/core.iml" group="core" />
       <module fileurl="file://$PROJECT_DIR$/genequery-core/core.iml" filepath="$PROJECT_DIR$/genequery-core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery-core/core_main.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery-core/core_main.iml" group="core" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery-core/core_test.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery-core/core_test.iml" group="core" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery.iml" />
       <module fileurl="file://$PROJECT_DIR$/genequery.iml" filepath="$PROJECT_DIR$/genequery.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery_main.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery_main.iml" group="genequery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery_test.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery_test.iml" group="genequery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery-rest/rest.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery-rest/rest.iml" group="rest" />
       <module fileurl="file://$PROJECT_DIR$/genequery-rest/rest.iml" filepath="$PROJECT_DIR$/genequery-rest/rest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery-rest/rest_main.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery-rest/rest_main.iml" group="rest" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/genequery-rest/rest_test.iml" filepath="$PROJECT_DIR$/.idea/modules/genequery-rest/rest_test.iml" group="rest" />
     </modules>
   </component>
 </project>
