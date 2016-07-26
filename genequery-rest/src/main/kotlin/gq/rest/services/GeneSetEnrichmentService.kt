@@ -20,23 +20,10 @@ open class GeneSetEnrichmentService @Autowired constructor(
         private val gqRestProperties: GQRestProperties,
         private val gqDataRepository: GQDataRepository) {
 
-    open fun convertGenes(rawGenes: List<String>,
-                          speciesFrom: Species,
-                          speciesTo: Species = speciesFrom): Pair<GeneFormat, Map<String, Long?>> {
-        try {
-            val currentGeneFormat = GeneFormat.guess(rawGenes)
-            return Pair(
-                    currentGeneFormat,
-                    gqDataRepository.smartConverter.toEntrez(rawGenes, currentGeneFormat, speciesFrom, speciesTo))
-        } catch (ex: IllegalArgumentException) {
-            throw BadRequestException(ex)
-        }
-    }
-
     open fun findEnrichedModules(rawGenes: List<String>,
                                  speciesFrom: Species,
                                  speciesTo: Species = speciesFrom): EnrichmentResponse {
-        val (identifiedGeneFormat, conversionMap) = convertGenes(rawGenes, speciesFrom, speciesTo)
+        val (identifiedGeneFormat, conversionMap) = convertGenes(rawGenes, speciesFrom, speciesTo, gqDataRepository)
 
         val entrezIds = conversionMap.values.filterNotNull()
         val enrichmentItems = findBonferroniSignificant(
