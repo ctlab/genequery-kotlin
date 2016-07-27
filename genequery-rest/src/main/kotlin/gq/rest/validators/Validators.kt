@@ -2,6 +2,7 @@ package gq.rest.validators
 
 import gq.core.data.Species
 import gq.rest.api.GeneSetEnrichmentController
+import gq.rest.api.OverlapController
 import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils
 import org.springframework.validation.Validator
@@ -49,7 +50,7 @@ class EnrichmentRequestFormValidator : Validator {
         val enrichmentRequestForm = target as GeneSetEnrichmentController.EnrichmentRequestForm
         val speciesValidator = SpeciesValidator()
 
-        if(validateIsNotNullAndNotBlank(enrichmentRequestForm.speciesFrom, errors, "speciesFrom")) {
+        if (validateIsNotNullAndNotBlank(enrichmentRequestForm.speciesFrom, errors, "speciesFrom")) {
             ValidationUtils.invokeValidator(speciesValidator, enrichmentRequestForm.speciesFrom, errors)
         }
         if (validateIsNotNullAndNotBlank(enrichmentRequestForm.speciesTo, errors, "speciesTo")) {
@@ -60,4 +61,26 @@ class EnrichmentRequestFormValidator : Validator {
     }
 
     override fun supports(clazz: Class<*>?) = GeneSetEnrichmentController.EnrichmentRequestForm::class.java.equals(clazz)
+}
+
+
+class OverlapRequestFormValidator : Validator {
+    override fun validate(target: Any?, errors: Errors?) {
+        val overlapRequestForm = target as OverlapController.OverlapRequestForm
+        val speciesValidator = SpeciesValidator()
+
+        if (validateIsNotNullAndNotBlank(overlapRequestForm.speciesFrom, errors, "speciesFrom")) {
+            ValidationUtils.invokeValidator(speciesValidator, overlapRequestForm.speciesFrom, errors)
+        }
+        if (validateIsNotNullAndNotBlank(overlapRequestForm.speciesTo, errors, "speciesTo")) {
+            ValidationUtils.invokeValidator(speciesValidator, overlapRequestForm.speciesTo, errors)
+        }
+
+        validateIsNotNullAndNotBlank(overlapRequestForm.genes, errors, "genes")
+
+        //TODO: probably should validate it the same way we validate speciesFrom and speciesTo
+        validateIsNotNullAndNotBlank(overlapRequestForm.moduleName, errors, "moduleName")
+    }
+
+    override fun supports(clazz: Class<*>?) = OverlapController.OverlapRequestForm::class.java.equals(clazz)
 }
