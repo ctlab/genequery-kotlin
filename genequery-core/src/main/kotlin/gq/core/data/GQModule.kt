@@ -79,5 +79,5 @@ open class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Sp
 
     fun seriesName() = Pair(gse, gpl)
 
-    override fun toString() = "${joinFullName()}$species,$size genes)"
+    override fun toString() = "${joinFullName()}$species,$size genes"
 }
