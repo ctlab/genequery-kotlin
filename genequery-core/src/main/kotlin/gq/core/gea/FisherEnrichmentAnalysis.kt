@@ -16,12 +16,16 @@ data class EnrichmentResultItem(val gse: Int,
                                 val intersectionSize: Int,
                                 val moduleSize: Int) : Comparable<EnrichmentResultItem> {
 
+    companion object {
+        const val MIN_LOG_P_VALUE = -325.0
+    }
+
     constructor(module: GQModule, pvalue: Double, adjPvalue: Double, intersectionSize: Int) : this(
             module.gse, module.gpl, module.number,
             pvalue,
-            if (pvalue > 0) Math.log10(pvalue) else Double.NEGATIVE_INFINITY,
+            if (pvalue > 0) Math.log10(pvalue) else MIN_LOG_P_VALUE,
             adjPvalue,
-            if (adjPvalue > 0) Math.log10(adjPvalue) else Double.NEGATIVE_INFINITY,
+            if (adjPvalue > 0) Math.log10(adjPvalue) else MIN_LOG_P_VALUE,
             intersectionSize,
             module.size)
 

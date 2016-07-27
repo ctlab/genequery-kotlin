@@ -37,11 +37,11 @@ class FisherEnrichmentAnalysisKtTest {
     }
 
     @Test
-    fun testFindBonferroniSignificantInfinity() {
+    fun testFindBonferroniSignificantMinLogPvalue() {
         val query = SpecifiedEntrezGenes(Species.MOUSE, readEntrezIds("large.txt"))
         val result = findBonferroniSignificant(dataset, query)
         assertDoubleEquals(0.0, result.first().pvalue, 1e-3)
-        assertEquals(Double.NEGATIVE_INFINITY, result.first().logPvalue)
+        assertEquals(EnrichmentResultItem.MIN_LOG_P_VALUE, result.first().logPvalue)
         assertTrue(result.first().intersectionSize == result.first().moduleSize)
     }
 
