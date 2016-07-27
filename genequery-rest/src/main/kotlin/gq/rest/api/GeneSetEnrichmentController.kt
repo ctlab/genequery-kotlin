@@ -32,7 +32,9 @@ open class GeneSetEnrichmentController @Autowired constructor(val geneSetEnrichm
         binder.addValidators(EnrichmentRequestFormValidator())
     }
 
-    @RequestMapping(produces = arrayOf("application/json"), method = arrayOf(RequestMethod.POST))
+    @RequestMapping(value = URL,
+            produces = arrayOf("application/json"),
+            method = arrayOf(RequestMethod.POST))
     @ResponseStatus(HttpStatus.OK)
     fun performEnrichment(@Validated @RequestBody form: EnrichmentRequestForm): EnrichmentResponse {
         LOG.info("Request accepted: speciesTo=${form.speciesTo},speciesFrom=${form.speciesFrom},genes=${form.genes?.joinToString(" ")}")

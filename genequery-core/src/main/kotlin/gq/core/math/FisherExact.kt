@@ -30,30 +30,30 @@ class FisherExact private constructor(universeSize: Int = 7000) {
         var bb = b
         var cc = c
         var dd = d
-        var pSum = 0.0;
-        var p = calculateHypergeomP(aa, bb, cc, dd);
+        var pSum = 0.0
+        var p = calculateHypergeomP(aa, bb, cc, dd)
         while (cc >= 0 && bb >= 0) {
-            pSum += p;
-            if (bb == 0 || cc == 0) break;
-            ++aa;
-            --bb;
-            --cc;
-            ++dd;
-            p = calculateHypergeomP(aa, bb, cc, dd);
+            pSum += p
+            if (bb == 0 || cc == 0) break
+            ++aa
+            --bb
+            --cc
+            ++dd
+            p = calculateHypergeomP(aa, bb, cc, dd)
         }
-        return pSum;
+        return pSum
     }
 
     private fun calculateHypergeomP(a: Int, b: Int, c: Int, d: Int): Double {
         return Math.exp(
                 logFactorials[a + b]
-                + logFactorials[c + d]
-                + logFactorials[a + c]
-                + logFactorials[b + d]
-                - logFactorials[a + b + c + d]
-                - logFactorials[a]
-                - logFactorials[b]
-                - logFactorials[c]
-                - logFactorials[d]);
+                        + logFactorials[c + d]
+                        + logFactorials[a + c]
+                        + logFactorials[b + d]
+                        - logFactorials[a + b + c + d]
+                        - logFactorials[a]
+                        - logFactorials[b]
+                        - logFactorials[c]
+                        - logFactorials[d])
     }
 }

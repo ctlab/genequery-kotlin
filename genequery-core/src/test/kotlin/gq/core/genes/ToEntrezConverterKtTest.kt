@@ -1,9 +1,8 @@
 package gq.core.genes
 
 import gq.core.data.Species
-import org.junit.Test
-
 import org.junit.Assert.*
+import org.junit.Test
 import java.io.File
 import java.nio.file.Paths
 

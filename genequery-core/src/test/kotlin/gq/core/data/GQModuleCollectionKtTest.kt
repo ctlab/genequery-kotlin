@@ -35,14 +35,14 @@ class GQModuleCollectionKtTest {
         assertTrue(Pair(10001, 1261) in dataset.seriesToModules)
         assertEquals(7, dataset.seriesToModules[Pair(10001, 1261)]!!.size)
         assertTrue(
-            "modules are not sorted within gse",
-            dataset.seriesToModules[Pair(10000, 1261)]!!
-                    .mapIndexed { i, gqModule ->  i == gqModule.number}
-                    .all { it })
+                "modules are not sorted within gse",
+                dataset.seriesToModules[Pair(10000, 1261)]!!
+                        .mapIndexed { i, gqModule -> i == gqModule.number }
+                        .all { it })
         assertTrue(
                 "modules are not sorted within gse",
                 dataset.seriesToModules[Pair(1001, 96)]!!
-                        .mapIndexed { i, gqModule ->  i == gqModule.number}
+                        .mapIndexed { i, gqModule -> i == gqModule.number }
                         .all { it })
     }
 

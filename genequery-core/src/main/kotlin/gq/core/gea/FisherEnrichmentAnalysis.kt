@@ -49,7 +49,7 @@ fun findBonferroniSignificant(
                 if (queryUniverseOverlap == 0) return null
 
                 val universeSize = modules.sumBy { it.size }
-                return modules.filter { it.number > 0 && moduleIdToIntersectionSize[it.number]!! > 0}.mapNotNull { module ->
+                return modules.filter { it.number > 0 && moduleIdToIntersectionSize[it.number]!! > 0 }.mapNotNull { module ->
                     val moduleAndQuery = moduleIdToIntersectionSize[module.number]!!
                     val moduleAndNotQuery = module.size - moduleAndQuery
                     val queryAndNotModule = queryUniverseOverlap - moduleAndQuery
@@ -66,6 +66,6 @@ fun findBonferroniSignificant(
 
                 }
             }
-        ).flatMap { it }.sorted()
+    ).flatMap { it }.sorted()
 }
 

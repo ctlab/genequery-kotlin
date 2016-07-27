@@ -1,8 +1,8 @@
 package gq.core.data
 
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 class GQModuleKtTest {
     fun testWithStd(arr1: LongArray, arr2: LongArray) {
@@ -61,17 +61,17 @@ class GQModuleKtTest {
         assertEquals(stringName, module.joinFullName())
     }
 
-    @Test(expected=IllegalArgumentException::class)
+    @Test(expected = IllegalArgumentException::class)
     fun testParseFullModuleNameBadNotEnoughParts1() {
         GQModule.parseFullModuleName("GSE123_GPL124")
     }
 
-    @Test(expected=IllegalArgumentException::class)
+    @Test(expected = IllegalArgumentException::class)
     fun testParseFullModuleNameBadNotEnoughParts2() {
         GQModule.parseFullModuleName("GSE123#3")
     }
 
-    @Test(expected=IllegalArgumentException::class)
+    @Test(expected = IllegalArgumentException::class)
     fun testParseFullModuleNameBadNumber() {
         GQModule.parseFullModuleName("GSE123_GPL124#asdf")
     }
