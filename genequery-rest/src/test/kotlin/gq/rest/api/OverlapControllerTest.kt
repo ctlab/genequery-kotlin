@@ -1,21 +1,27 @@
 package gq.rest.api
 
 import gq.rest.Application
-import gq.rest.api.OverlapController.Companion.URL
 import org.hamcrest.Matchers.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.SpringApplicationConfiguration
+import org.springframework.http.MediaType
+import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.mock.http.MockHttpOutputMessage
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import java.nio.charset.Charset
 
 
 @RunWith(SpringJUnit4ClassRunner::class)
@@ -36,6 +42,10 @@ open class OverlapControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
     }
 
+    var mappingJackson2HttpMessageConverter: HttpMessageConverter<Any> = MappingJackson2HttpMessageConverter()
+
+    val contentType = MediaType(MediaType.APPLICATION_JSON.type, MediaType.APPLICATION_JSON.subtype, Charset.forName("utf8"))
+
     @Test
     fun testBasicRequest() {
         val requestForm = OverlapController.OverlapRequestForm()
@@ -44,7 +54,7 @@ open class OverlapControllerTest {
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
         requestForm.moduleName = "GSE1000_GPL96#0"
-        mockMvc.makeRequest(URL, requestForm)
+        makeRequest(requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(4)))
@@ -62,7 +72,7 @@ open class OverlapControllerTest {
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
         requestForm.moduleName = "GSE1000_GPL96#0"
-        mockMvc.makeRequest(URL, requestForm)
+        makeRequest(requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(queryGenes.size)))
@@ -76,7 +86,7 @@ open class OverlapControllerTest {
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
         requestForm.moduleName = "GSE1000_GPL96#0"
-        mockMvc.makeRequest(URL, requestForm)
+        makeRequest(requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(0)))
@@ -91,7 +101,7 @@ open class OverlapControllerTest {
         requestForm.speciesTo = "hs"
         requestForm.moduleName = "GSE1000_GPL96#0"
 
-        mockMvc.makeRequest(URL, requestForm)
+        makeRequest(requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
@@ -108,7 +118,7 @@ open class OverlapControllerTest {
         requestForm.speciesTo = "hs"
         requestForm.moduleName = "GSE1337_GPL42#0"
 
-        mockMvc.makeRequest(URL, requestForm)
+        makeRequest(requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
@@ -122,7 +132,7 @@ open class OverlapControllerTest {
         requestForm.genes = emptyList()
         requestForm.speciesTo = "hss"
 
-        mockMvc.makeRequest(URL, requestForm)
+        makeRequest(requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
@@ -131,5 +141,18 @@ open class OverlapControllerTest {
                 .andExpect(jsonPath("$.errors", hasItem(containsString("hss"))))
                 .andExpect(jsonPath("$.errors", hasItem(containsString("speciesFrom"))))
                 .andExpect(jsonPath("$.errors", hasItem(containsString("genes"))))
+    }
+
+    private fun makeRequest(form: OverlapController.OverlapRequestForm): ResultActions {
+        return mockMvc.perform(post(OverlapController.URL).content(json(form)).contentType(contentType))
+                .andDo { handler ->
+                    println(handler.response.contentAsString)
+                }
+    }
+
+    private fun json(o: Any): String {
+        val outputMessage = MockHttpOutputMessage()
+        mappingJackson2HttpMessageConverter.write(o, MediaType.APPLICATION_JSON, outputMessage)
+        return outputMessage.bodyAsString
     }
 }

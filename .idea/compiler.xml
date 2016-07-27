@@ -17,13 +17,5 @@
         <processorPath useClasspath="true" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="core_main" target="1.8" />
-      <module name="core_test" target="1.8" />
-      <module name="genequery_main" target="1.8" />
-      <module name="genequery_test" target="1.8" />
-      <module name="rest_main" target="1.8" />
-      <module name="rest_test" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
