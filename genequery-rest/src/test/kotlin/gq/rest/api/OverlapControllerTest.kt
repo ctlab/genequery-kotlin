@@ -1,7 +1,7 @@
 package gq.rest.api
 
 import gq.rest.Application
-import gq.rest.api.GeneSetEnrichmentController.Companion.URL
+import gq.rest.api.OverlapController.Companion.URL
 import org.hamcrest.Matchers.*
 import org.junit.Before
 import org.junit.Test
@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext
         initializers = arrayOf(PatchEnvPropsAppCtxInitializer::class))
 @WebAppConfiguration
 @TestPropertySource(locations = arrayOf("/application-test.properties"))
-open class GeneSetEnrichmentControllerTest {
+open class OverlapControllerTest {
 
     @Autowired
     lateinit var wac: WebApplicationContext
@@ -36,99 +36,89 @@ open class GeneSetEnrichmentControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
     }
 
-
     @Test
-    fun testBasicRequestSameSpeciesEntrezToEntrez() {
-        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
-        val queryGenes = listOf("494143", "390916", "375444", "153527", "139341", "112495", "91947", "91942", "80762",
-                "80213", "79665", "64963", "64105", "55333", "55179", "51637", "51227", "51121", "29978", "27089",
-                "25939", "24137", "23014", "11345", "11137", "10196", "10159", "9367", "9338", "8697", "8533", "8487",
-                "8293", "7272", "7020", "6728", "6500", "6240", "6170", "5955", "5934", "5716", "5636", "5634", "5160",
-                "4724", "4707", "4695", "4694", "3251", "3094", "2287", "1968", "1350", "819")
+    fun testBasicRequest() {
+        val requestForm = OverlapController.OverlapRequestForm()
+        val queryGenes = listOf("440915", "127703", "85377", "81577", "100509635", "100420758", "497661", "388403")
         requestForm.genes = queryGenes
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
-
+        requestForm.moduleName = "GSE1000_GPL96#0"
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("entrez")))
-                .andExpect(jsonPath("$.result.geneConversionMap.494143", equalTo(494143)))
-                .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(3)))
-                .andExpect(jsonPath("$.result.enrichmentResultItems[0].gse", equalTo(10021)))
-                .andExpect(jsonPath("$.result.enrichmentResultItems[0].logAdjPvalue", closeTo(-131.88785323, 1e-5)))
-                .andExpect(jsonPath("$.result.enrichmentResultItems[0].intersectionSize", equalTo(55)))
+                .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(4)))
     }
 
     @Test
-    fun testBasicRequestDifferentSpeciesSymbolToEntrez() {
-        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
-        val queryGenes = listOf("ACADM", "Acadvl", "ACAT1", "ACVR1", "SGCA", "ADSL", "aasdf")
+    fun testFullModuleOverlap() {
+        val requestForm = OverlapController.OverlapRequestForm()
+        val queryGenes = listOf("440915", "127703", "85377", "81577", "80339", "64794", "63035", "58513", "57157",
+                "56834", "54974", "54662", "29095", "25786", "23435", "23428", "23389", "23221", "23099", "11264",
+                "11187", "11034", "9922", "7804", "7184", "6992", "6772", "6388", "6386", "6233", "6181", "6166",
+                "5983", "5831", "5780", "5754", "5630", "5307", "4948", "4691", "4216", "4026", "3996", "3636", "3070",
+                "2869", "2512", "1984", "1933", "1793", "832", "805", "162")
         requestForm.genes = queryGenes
         requestForm.speciesFrom = "hs"
-        requestForm.speciesTo = "mm"
-
+        requestForm.speciesTo = "hs"
+        requestForm.moduleName = "GSE1000_GPL96#0"
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.errors", nullValue()))
-                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("symbol")))
-                .andExpect(jsonPath("$.result.geneConversionMap.ADSL", equalTo(11564)))
-                .andExpect(jsonPath("$.result.geneConversionMap.aasdf", nullValue()))
-                .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(1)))
-                .andExpect(jsonPath("$.result.enrichmentResultItems[0].moduleNumber", equalTo(6)))
+                .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(queryGenes.size)))
     }
 
     @Test
-    fun testBadSpecies() {
-        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
-        val queryGenes = listOf("494143", "390916")
+    fun testNoOverlap() {
+        val requestForm = OverlapController.OverlapRequestForm()
+        val queryGenes = listOf("1337", "42")
         requestForm.genes = queryGenes
         requestForm.speciesFrom = "hs"
-        requestForm.speciesTo = "hss"
-
+        requestForm.speciesTo = "hs"
+        requestForm.moduleName = "GSE1000_GPL96#0"
         mockMvc.makeRequest(URL, requestForm)
-                .andExpect(status().is4xxClientError)
-                .andExpect(jsonPath("$.success", equalTo(false)))
-                .andExpect(jsonPath("$.result", nullValue()))
-                .andExpect(jsonPath("$.errors", hasSize<Int>(1)))
-                .andExpect(jsonPath("$.errors[0]", containsString("hss")))
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.success", equalTo(true)))
+                .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(0)))
     }
 
     @Test
     fun testAmbiguousGenes() {
-        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
-        val queryGenes = listOf("494143", "Abc")
+        val requestForm = OverlapController.OverlapRequestForm()
+        val queryGenes = listOf("440915", "Abc")
         requestForm.genes = queryGenes
         requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
+        requestForm.moduleName = "GSE1000_GPL96#0"
 
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
                 .andExpect(jsonPath("$.errors", hasSize<Int>(1)))
-                .andExpect(jsonPath("$.errors[0]", allOf(containsString("494143"), containsString("Abc"))))
+                .andExpect(jsonPath("$.errors[0]", allOf(containsString("440915"), containsString("Abc"))))
     }
 
     @Test
-    fun testNoSpecies() {
-        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
-        val queryGenes = listOf("494143", "390916")
+    fun testMissingModule() {
+        val requestForm = OverlapController.OverlapRequestForm()
+        val queryGenes = listOf("440915", "127703")
         requestForm.genes = queryGenes
+        requestForm.speciesFrom = "hs"
         requestForm.speciesTo = "hs"
+        requestForm.moduleName = "GSE1337_GPL42#0"
 
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
                 .andExpect(jsonPath("$.errors", hasSize<Int>(1)))
-                .andExpect(jsonPath("$.errors[0]", containsString("speciesFrom")))
+                .andExpect(jsonPath("$.errors[0]", allOf(containsString("Module"), containsString("not found"))))
     }
 
     @Test
     fun testFewErrors() {
-        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
+        val requestForm = OverlapController.OverlapRequestForm()
         requestForm.genes = emptyList()
         requestForm.speciesTo = "hss"
 
@@ -136,7 +126,8 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(status().is4xxClientError)
                 .andExpect(jsonPath("$.success", equalTo(false)))
                 .andExpect(jsonPath("$.result", nullValue()))
-                .andExpect(jsonPath("$.errors", hasSize<Int>(3)))
+                .andExpect(jsonPath("$.errors", hasSize<Int>(4)))
+                .andExpect(jsonPath("$.errors", hasItem(containsString("moduleName"))))
                 .andExpect(jsonPath("$.errors", hasItem(containsString("hss"))))
                 .andExpect(jsonPath("$.errors", hasItem(containsString("speciesFrom"))))
                 .andExpect(jsonPath("$.errors", hasItem(containsString("genes"))))
