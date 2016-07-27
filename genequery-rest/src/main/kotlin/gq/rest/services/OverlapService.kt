@@ -8,7 +8,7 @@ import gq.rest.exceptions.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-data class OverlapResponse(val overlapGenes: LongArray)
+data class OverlapResponse(val overlapGenes: List<String>)
 
 @Service
 open class OverlapService @Autowired constructor(private val gqDataRepository: GQDataRepository) {
@@ -29,7 +29,8 @@ open class OverlapService @Autowired constructor(private val gqDataRepository: G
         val conversionMap = convertGenes(rawGenes, speciesFrom, speciesTo, gqDataRepository).second
         val module = getModule(moduleName)
         val entrezIds = conversionMap.values.filterNotNull().toLongArray().sortedArray()
-        val overlapGenes = entrezIds intersectWithSorted module.sortedEntrezIds
+        val entrezOverlap = entrezIds intersectWithSorted module.sortedEntrezIds
+        val overlapGenes = gqDataRepository.smartConverter.toSymbol(entrezOverlap.toList(), speciesFrom, speciesTo).mapNotNull { it.value }
         return OverlapResponse(overlapGenes)
     }
 }
