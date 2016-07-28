@@ -6,7 +6,7 @@ fun populateModulesFromGmt(path: String, species: Species, dest: MutableList<GQM
     File(path).forEachLine {
         if (it.isNotEmpty()) {
             try {
-                val (fullName, commaSepEntrezIds) = it.split("\t");
+                val (fullName, commaSepEntrezIds) = it.split("\t")
                 dest.add(GQModule.buildByFullName(
                         fullName,
                         species,
