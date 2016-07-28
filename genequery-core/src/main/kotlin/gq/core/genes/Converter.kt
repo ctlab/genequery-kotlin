@@ -1,6 +1,6 @@
 package gq.core.genes
 
-import gq.core.crossLinkMaps
+import gq.core.crossLinkMap
 import gq.core.data.Species
 import java.io.File
 
@@ -67,7 +67,7 @@ class ToEntrezConverter(entrezOtherMappings: Iterable<GeneMapping> = emptyList()
         if (format == GeneFormat.ENTREZ) return geneIds.associate { Pair(it, it.toLong()) }
         val originalToNorm = format.mapToNormalized(geneIds)
         val normToEntrez = convertDetailed(species, originalToNorm.values)
-        return crossLinkMaps(originalToNorm, normToEntrez)
+        return crossLinkMap(originalToNorm, normToEntrez)
     }
 }
 
@@ -134,7 +134,7 @@ class GeneOrthologyConverter(orthologyMappings: Iterable<OrthologyMapping>) {
                     throw IllegalArgumentException("Orthology mapping contains SYMBOL, ENTREZ and REFSEQ formats only. ENSEMBL passed.")
                 GeneFormat.ENTREZ -> {
                     val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
-                    crossLinkMaps(strToLongEntrez,getOrthologyByEntrez(strToLongEntrez.values, speciesTo))
+                    crossLinkMap(strToLongEntrez,getOrthologyByEntrez(strToLongEntrez.values, speciesTo))
                 }
                 GeneFormat.REFSEQ -> getOrthologyByRefseq(geneIds, speciesTo)
                 GeneFormat.SYMBOL -> getOrthologyBySymbol(geneIds, speciesTo)
@@ -157,7 +157,7 @@ class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
                 val ensemblToOriginalEntrez = toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
                 val entrezOriginalToTarget = orthologyConverter.getOrthologyByEntrez(
                         ensemblToOriginalEntrez.values.filterNotNull(), speciesTo).mapValues { it.value?.entrezId }
-                crossLinkMaps(ensemblToOriginalEntrez, entrezOriginalToTarget)
+                crossLinkMap(ensemblToOriginalEntrez, entrezOriginalToTarget)
             }
             GeneFormat.ENTREZ -> {
                 val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
@@ -165,9 +165,14 @@ class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
                         strToLongEntrez.values.toList(),
                         speciesFrom,
                         speciesTo)
-                crossLinkMaps(strToLongEntrez, longEntrezToTargetEntrez)
+                crossLinkMap(strToLongEntrez, longEntrezToTargetEntrez)
             }
-            GeneFormat.SYMBOL -> orthologyConverter.getOrthologyBySymbol(geneIds, speciesTo).mapValues { it.value?.entrezId }
+            GeneFormat.SYMBOL -> {
+                val normalizedIds = GeneFormat.SYMBOL.mapToNormalized(geneIds)
+                val normalizedIdsToOrthology =
+                        orthologyConverter.getOrthologyBySymbol(normalizedIds.values, speciesTo).mapValues { it.value?.entrezId }
+                crossLinkMap(normalizedIds, normalizedIdsToOrthology)
+            }
         }
     }
 
@@ -190,20 +195,20 @@ class SmartConverter(private val toEntrezConverter: ToEntrezConverter,
             val originalToEntrezIds = toEntrezConverter.normalizeAndConvert(speciesFrom, geneIds, formatFrom)
             val entrezToSymbol = fromEntrezToSymbolConverter.convertDetailed(
                     speciesFrom, originalToEntrezIds.values.filterNotNull())
-            return crossLinkMaps(originalToEntrezIds, entrezToSymbol)
+            return crossLinkMap(originalToEntrezIds, entrezToSymbol)
         }
 
         return when(formatFrom) {
             GeneFormat.ENTREZ -> {
                 val strToLongEntrez = geneIds.associate { Pair(it, it.toLong()) }
-                crossLinkMaps(strToLongEntrez, toSymbol(strToLongEntrez.values.toList(), speciesFrom, speciesTo))
+                crossLinkMap(strToLongEntrez, toSymbol(strToLongEntrez.values.toList(), speciesFrom, speciesTo))
             }
             else -> {
                 val normalizedIds = formatFrom.mapToNormalized(geneIds).values.toList()
                 val normalizedToOrthology = when(formatFrom) {
                     GeneFormat.ENSEMBL, GeneFormat.REFSEQ -> {
                         val normalizedToEntrez = toEntrezConverter.convertDetailed(speciesFrom, normalizedIds)
-                        crossLinkMaps(
+                        crossLinkMap(
                                 normalizedToEntrez,
                                 orthologyConverter.getOrthologyByEntrez(normalizedToEntrez.values.filterNotNull(), speciesTo))
                     }

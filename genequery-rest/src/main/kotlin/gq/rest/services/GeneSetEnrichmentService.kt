@@ -4,10 +4,8 @@ import gq.core.data.Species
 import gq.core.gea.EnrichmentResultItem
 import gq.core.gea.SpecifiedEntrezGenes
 import gq.core.gea.findBonferroniSignificant
-import gq.core.genes.GeneFormat
 import gq.rest.GQDataRepository
 import gq.rest.config.GQRestProperties
-import gq.rest.exceptions.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -23,7 +21,7 @@ open class GeneSetEnrichmentService @Autowired constructor(
     open fun findEnrichedModules(rawGenes: List<String>,
                                  speciesFrom: Species,
                                  speciesTo: Species = speciesFrom): EnrichmentResponse {
-        val (identifiedGeneFormat, conversionMap) = convertGenes(rawGenes, speciesFrom, speciesTo, gqDataRepository)
+        val (identifiedGeneFormat, conversionMap) = convertGenesToEntrez(rawGenes, speciesFrom, speciesTo, gqDataRepository)
 
         val entrezIds = conversionMap.values.filterNotNull()
         val enrichmentItems = findBonferroniSignificant(

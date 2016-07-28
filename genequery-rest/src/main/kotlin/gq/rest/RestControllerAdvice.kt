@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 import java.util.*
 
-class ResponseEnvelope(@JsonInclude(JsonInclude.Include.NON_NULL) val result: Any?,
-                       val success: Boolean = true,
-                       @JsonInclude(JsonInclude.Include.NON_NULL) var errors: List<String>? = null)
+class ResponseWrapper(@JsonInclude(JsonInclude.Include.NON_NULL) val result: Any?,
+                      val success: Boolean = true,
+                      @JsonInclude(JsonInclude.Include.NON_NULL) var errors: List<String>? = null)
 
-class SuccessResponseEntity(body: Any?) : ResponseEntity<ResponseEnvelope>(ResponseEnvelope(body, true, null), HttpStatus.OK)
-class ErrorResponseEntity(errors: List<String>?, status: HttpStatus) : ResponseEntity<ResponseEnvelope>(ResponseEnvelope(null, false, errors), status) {
+class SuccessResponseEntity(body: Any?) : ResponseEntity<ResponseWrapper>(ResponseWrapper(body, true, null), HttpStatus.OK)
+class ErrorResponseEntity(errors: List<String>?, status: HttpStatus) : ResponseEntity<ResponseWrapper>(ResponseWrapper(null, false, errors), status) {
     constructor(error: String, status: HttpStatus) : this(listOf(error), status)
 }
 
@@ -51,8 +51,8 @@ class RestControllerAdvice : ResponseBodyAdvice<Any?> {
                                  selectedContentType: MediaType?,
                                  selectedConverterType: Class<out HttpMessageConverter<*>>?,
                                  request: ServerHttpRequest?,
-                                 response: ServerHttpResponse?): ResponseEnvelope {
-        return if (body is ResponseEnvelope) body else ResponseEnvelope(body);
+                                 response: ServerHttpResponse?): ResponseWrapper {
+        return if (body is ResponseWrapper) body else ResponseWrapper(body);
     }
 
 //    // https://github.com/arawn/kotlin-spring-example/blob/master/src/main/kotlin/org/ksug/forum/web/support/ErrorResponse.kt
@@ -81,7 +81,7 @@ class RestControllerAdvice : ResponseBodyAdvice<Any?> {
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(RuntimeException::class)
-    fun handleRuntimeExceptions(ex: Exception): ResponseEntity<ResponseEnvelope> {
+    fun handleRuntimeExceptions(ex: Exception): ResponseEntity<ResponseWrapper> {
         LOG.error(HttpStatus.INTERNAL_SERVER_ERROR.reasonPhrase, ex)
         return ErrorResponseEntity(
                 messageSource.getMessage("error.internal", null, "Internal error", LOCALE),

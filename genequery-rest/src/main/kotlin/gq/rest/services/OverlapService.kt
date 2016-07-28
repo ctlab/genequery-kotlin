@@ -26,7 +26,7 @@ open class OverlapService @Autowired constructor(private val gqDataRepository: G
                          speciesFrom: Species,
                          speciesTo: Species = speciesFrom,
                          moduleName: String): OverlapResponse {
-        val conversionMap = convertGenes(rawGenes, speciesFrom, speciesTo, gqDataRepository).second
+        val conversionMap = convertGenesToEntrez(rawGenes, speciesFrom, speciesTo, gqDataRepository).second
         val module = getModule(moduleName)
         val entrezIds = conversionMap.values.filterNotNull().toLongArray().sortedArray()
         val entrezOverlap = entrezIds intersectWithSorted module.sortedEntrezIds
