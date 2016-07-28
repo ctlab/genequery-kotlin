@@ -1,0 +1,17 @@
+GSE11111	asdf a
+
+GSE40278	A multiply redundant genetic switch locks in the transcriptional signature of T regulatory cells
+GSE44972	Cell reprogramming requires silencing of a core subset of Polycomb targets.
+GSE7605	Expression in Kir6.1-deficient heart following LPS challenge
+GSE40273	Gene expression profiling in Treg cells deficient or mutant in candidate FoxP3 cofactors
+GSE39110	Gene expression by antigen activated OT-I T cells in vivo in the presence and absence of IL-2
+GSE33199	A mouse model of the most aggressive subgroup of human medulloblastoma [Mouse430_2]
+GSE22532	Identifying Molecular Effects of Diet through Systems Biology: Influence of Herring Diet on Sterol Metabolism and Protein Turnover in Mice
+GSE40277	Gene profiling data of CD4+ T cells doubly transduced with EOS+LEF1 or GATA1+SATB1
+GSE40274	Gene profiling data of CD4+ T cells transduced with FOXP3 and candidate cofactors
+GSE19855	Molecular Characterization of Treponema denticola infection-induced bone and soft tissue transcriptional profiles
+GSE1025	Hindlimb muscle, comparison of wild type and mdx mice, 7 to 112 Day (Porter lab)
+
+
+GSE1026	Diaphram, comparison of wild type and mdx mice, 7 to 112 Days (Porter lab)
+GSE33754	Expression data of cartiliage from CBA and STR/ORT mice
