@@ -8,7 +8,7 @@ import gq.rest.exceptions.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-data class OverlapResponse(val overlapGenes: List<String>)
+data class OverlapResponse(val overlapSymbolGenes: List<String>)
 
 @Service
 open class OverlapService @Autowired constructor(private val gqDataRepository: GQDataRepository) {

@@ -47,7 +47,7 @@ open class OverlapControllerTest {
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(4)))
+                .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(4)))
     }
 
     @Test
@@ -65,7 +65,7 @@ open class OverlapControllerTest {
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(queryGenes.size)))
+                .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(queryGenes.size)))
     }
 
     @Test
@@ -79,7 +79,7 @@ open class OverlapControllerTest {
         mockMvc.makeRequest(URL, requestForm)
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
-                .andExpect(jsonPath("$.result.overlapGenes", hasSize<Int>(0)))
+                .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(0)))
     }
 
     @Test

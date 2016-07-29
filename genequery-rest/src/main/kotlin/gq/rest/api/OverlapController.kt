@@ -45,7 +45,7 @@ open class OverlapController @Autowired constructor(val overlapService: OverlapS
                 Species.fromOriginal(form.speciesTo ?: form.speciesFrom!!),
                 form.moduleName!!
         )
-        LOG.info("Overlap result: ${overlapResponse.overlapGenes.size}")
+        LOG.info("Overlap result: ${overlapResponse.overlapSymbolGenes.size}")
         return overlapResponse
     }
 }
