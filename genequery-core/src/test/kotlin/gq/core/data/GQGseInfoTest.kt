@@ -12,7 +12,8 @@ class GQGseInfoTest {
             readGseInfoFromFile(Thread.currentThread().contextClassLoader.getResource("collection/titles.txt").path)
         }
         assertEquals(info["GSE11111"]?.title, "asdf a")
-        assertEquals(info["GSE11111"]?.name, "GSE11111")
+        assertEquals(info["GSE11111"]?.id, 11111)
+        assertEquals(info["GSE11111"], info[11111])
         assertEquals(info.size(), 14)
     }
 

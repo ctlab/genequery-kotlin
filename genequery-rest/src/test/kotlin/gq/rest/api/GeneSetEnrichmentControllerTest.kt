@@ -1,5 +1,6 @@
 package gq.rest.api
 
+import gq.core.data.GQGseInfo
 import gq.rest.Application
 import gq.rest.api.GeneSetEnrichmentController.Companion.URL
 import org.hamcrest.Matchers.*
@@ -58,6 +59,8 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].gse", equalTo(10021)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].logAdjPvalue", closeTo(-131.88785323, 1e-5)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].intersectionSize", equalTo(55)))
+                .andExpect(jsonPath("$.result.gseToTitle.GSE10021", equalTo("Some gse.")))
+                .andExpect(jsonPath("$.result.gseToTitle.GSE10245", equalTo(GQGseInfo.DEFAULT_TITLE)))
     }
 
     @Test
@@ -77,6 +80,22 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.geneConversionMap.aasdf", nullValue()))
                 .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(1)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].moduleNumber", equalTo(6)))
+    }
+
+    @Test
+    fun testNoResultFound() {
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
+        val queryGenes = listOf("__1", "__2")
+        requestForm.genes = queryGenes
+        requestForm.speciesFrom = "hs"
+        requestForm.speciesTo = "mm"
+
+        mockMvc.makeRequest(URL, requestForm)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.success", equalTo(true)))
+                .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("symbol")))
+                .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(0)))
+                .andExpect(jsonPath("$.result.gseToTitle", equalTo(emptyMap<String, String>())))
     }
 
     @Test

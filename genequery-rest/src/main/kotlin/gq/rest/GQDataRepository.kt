@@ -1,8 +1,6 @@
 package gq.rest
 
-import gq.core.data.GQModuleCollection
-import gq.core.data.Species
-import gq.core.data.readModulesFromFiles
+import gq.core.data.*
 import gq.core.genes.*
 import gq.rest.config.GQRestProperties
 import org.apache.log4j.Logger
@@ -47,5 +45,10 @@ class GQDataRepository @Autowired constructor(private val gqRestProperties: GQRe
                 .filter { Files.exists(Paths.get(it.second)) }
         LOG.info("Initialize module collection from ${availableGmtFiles.joinToString(",")}")
         readModulesFromFiles(availableGmtFiles)
+    }
+
+    val gseInfoCollection = GQGseInfoCollection {
+        LOG.info("Populate GSE info from ${gqRestProperties.pathGseInfo()}")
+        readGseInfoFromFile(gqRestProperties.pathGseInfo())
     }
 }

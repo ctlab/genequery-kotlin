@@ -2,16 +2,39 @@ package gq.core.data
 
 import java.io.File
 
-data class GQGseInfo(val name: String, val title: String)
+/**
+ * id – numerical part of GSE name, i.e. 12345 for GSE12345
+ */
+data class GQGseInfo(val id: Int, val title: String) {
+    companion object {
+        const val DEFAULT_TITLE = "No title"
+
+        fun parseIdFromName(name: String): Int {
+            if (!name.startsWith("GSE")) {
+                throw Exception("Wrong GSE name format: $name")
+            }
+            try {
+                return name.removePrefix("GSE").toInt()
+            } catch (e: NumberFormatException) {
+                throw Exception("Wrong GSE name format: $name")
+            }
+        }
+
+        fun idToName(id: Int) = "GSE" + id
+    }
+}
 
 
-class GQGseInfoCollection(gqGseInfos: Iterable<GQGseInfo>) {
+class GQGseInfoCollection(gqGseInfoItems: Iterable<GQGseInfo>) {
     constructor(gqGseInfoInit: () -> Iterable<GQGseInfo>) : this(gqGseInfoInit())
 
-    private val nameToInfo = gqGseInfos.associate { Pair(it.name, it) }
+    private val idToInfo = gqGseInfoItems.associate { Pair(it.id, it) }
 
-    operator fun get(name: String) = nameToInfo[name]
-    fun size() = nameToInfo.size
+    operator fun get(name: String) = idToInfo[GQGseInfo.parseIdFromName(name)]
+
+    operator fun get(id: Int) = idToInfo[id]
+
+    fun size() = idToInfo.size
 }
 
 
@@ -21,7 +44,7 @@ fun readGseInfoFromFile(path: String): List<GQGseInfo> {
         if (it.isNotEmpty()) {
             try {
                 val (name, title) = it.split("\t")
-                infoList.add(GQGseInfo(name, title))
+                infoList.add(GQGseInfo(GQGseInfo.parseIdFromName(name), title))
             } catch(e: Exception) {
                 throw RuntimeException("Fail in parsing GSE info: $it", e)
             }

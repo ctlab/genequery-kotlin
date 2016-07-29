@@ -12,6 +12,7 @@ open class GQRestProperties(env: Environment) {
     fun pathRefseqToEntrez() = Paths.get(dataPath, "refseq-to-entrez.tsv").toString()
     fun pathEnsemblToEntrez() = Paths.get(dataPath, "ensembl-to-entrez.tsv").toString()
     fun pathSymbolToEntrez() = Paths.get(dataPath, "symbol-to-entrez.tsv").toString()
+    fun pathGseInfo() = Paths.get(dataPath, "gse-info.txt").toString()
 
     fun pathToGMT(species: Species) = Paths.get(dataPath, "$species.modules.gmt").toString()
 }
