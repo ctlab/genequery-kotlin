@@ -12,7 +12,7 @@ fun populateModulesFromGmt(path: String, species: Species, dest: MutableList<GQM
                         species,
                         commaSepEntrezIds.split(',').map { it.toLong() }.toLongArray()))
             } catch(e: Exception) {
-                throw RuntimeException("Fail in parsing GMT line: $it", e)
+                throw RuntimeException("Fail to parse GMT line: $it", e)
             }
         }
     }

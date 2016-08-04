@@ -46,7 +46,7 @@ fun readGseInfoFromFile(path: String): List<GQGseInfo> {
                 val (name, title) = it.split("\t")
                 infoList.add(GQGseInfo(GQGseInfo.parseIdFromName(name), title))
             } catch(e: Exception) {
-                throw RuntimeException("Fail in parsing GSE info: $it", e)
+                throw RuntimeException("Fail to parse GSE info: $it", e)
             }
         }
     }

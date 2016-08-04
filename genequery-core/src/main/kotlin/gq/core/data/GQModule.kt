@@ -71,9 +71,11 @@ open class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Sp
             val (gse, gpl, number) = parseFullModuleName(fullName)
             return GQModule(gse, gpl, number, species, entrezIds)
         }
+
+        fun joinFullName(gse: Int, gpl: Int, number: Int) = "GSE${gse}_GPL$gpl#$number"
     }
 
-    fun joinFullName() = "GSE${gse}_GPL$gpl#$number"
+    fun joinFullName() = joinFullName(gse, gpl, number)
 
     fun fullName() = Triple(gse, gpl, number)
 

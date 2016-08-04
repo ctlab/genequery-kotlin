@@ -1,9 +1,6 @@
 package gq.core.gea
 
-import gq.core.data.GQModule
-import gq.core.data.GQModuleCollection
-import gq.core.data.Species
-import gq.core.data.sizeOfIntersectionWithSorted
+import gq.core.data.*
 import gq.core.math.FisherExact
 
 data class EnrichmentResultItem(val gse: Int,
