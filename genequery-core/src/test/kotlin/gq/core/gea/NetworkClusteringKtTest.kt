@@ -27,7 +27,7 @@ class NetworkClusteringKtTest {
                 clusterCollection,
                 MinLogAdjPvalueScoreEvaluationStrategy())
 
-        assertTrue(GQNetworkCluster.ZERO_CLUSTER_ID in idToGroup)
+        assertTrue(GQNetworkCluster.FREE_CLUSTER_ID in idToGroup)
         assertTrue(1 in idToGroup)
         assertTrue(2 in idToGroup)
         assertTrue(3 in idToGroup)
@@ -36,11 +36,11 @@ class NetworkClusteringKtTest {
         Assert.assertEquals(idToGroup[1]!!.moduleNames.size, 20)
         Assert.assertEquals(idToGroup[2]!!.moduleNames.size, 20)
         Assert.assertEquals(idToGroup[3]!!.moduleNames.size, 20)
-        Assert.assertEquals(idToGroup[GQNetworkCluster.ZERO_CLUSTER_ID]!!.moduleNames.size, 41)
+        Assert.assertEquals(idToGroup[GQNetworkCluster.FREE_CLUSTER_ID]!!.moduleNames.size, 41)
 
         assertTrue("GSE1_GPL1#1" in idToGroup[1]!!.moduleNames)
         assertTrue("GSE3_GPL3#5" in idToGroup[2]!!.moduleNames)
-        assertTrue("GSE7_GPL7#1" in idToGroup[GQNetworkCluster.ZERO_CLUSTER_ID]!!.moduleNames)
+        assertTrue("GSE7_GPL7#1" in idToGroup[GQNetworkCluster.FREE_CLUSTER_ID]!!.moduleNames)
     }
 
     @Test
@@ -64,8 +64,8 @@ class NetworkClusteringKtTest {
                 idToGroup[1]!!.moduleNames.map { enrichedItems[it]!! }.minBy { it.logAdjPvalue }!!.logAdjPvalue,
                 idToGroup[1]!!.score, 1e-10)
         Assert.assertEquals(
-                idToGroup[GQNetworkCluster.ZERO_CLUSTER_ID]!!
+                idToGroup[GQNetworkCluster.FREE_CLUSTER_ID]!!
                         .moduleNames.map { enrichedItems[it]!! }.minBy { it.logAdjPvalue }!!.logAdjPvalue,
-                idToGroup[GQNetworkCluster.ZERO_CLUSTER_ID]!!.score, 1e-10)
+                idToGroup[GQNetworkCluster.FREE_CLUSTER_ID]!!.score, 1e-10)
     }
 }

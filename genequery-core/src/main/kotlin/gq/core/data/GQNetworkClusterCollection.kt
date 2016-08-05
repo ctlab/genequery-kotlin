@@ -6,7 +6,7 @@ data class GQNetworkCluster(val id: Int,
                             val moduleNames: Set<String>,
                             val annotation: String? = null) {
     companion object {
-        const val ZERO_CLUSTER_ID = 0
+        const val FREE_CLUSTER_ID = 0  // Cluster of non-clustered modules
     }
 }
 
@@ -37,7 +37,7 @@ fun populateClusterInfoFromFiles(clusters: MutableCollection<GQNetworkCluster>,
     File(pathToAnnotation).forEachLine {
         if (it.isNotEmpty()) {
             try {
-                val (clusterId, annotation) = it.split("\t")
+                val (clusterId, annotation) = it.split(Regex("\t"), 2)
                 idToAnnotation[clusterId.toInt()] = annotation
             } catch(e: Exception) {
                 throw RuntimeException("Fail to parse line with annotation: $it", e)

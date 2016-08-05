@@ -51,4 +51,24 @@ class GQDataRepository @Autowired constructor(private val gqRestProperties: GQRe
         LOG.info("Populate GSE info from ${gqRestProperties.pathGseInfo()}")
         readGseInfoFromFile(gqRestProperties.pathGseInfo())
     }
+
+    val networkClusterCollection = GQNetworkClusterCollection {
+        if (gqRestProperties.clusteringIsOn) {
+            val clusters: MutableList<GQNetworkCluster> = mutableListOf()
+            Species.values().forEach {
+                val pathToClusters = gqRestProperties.pathToClusterModules(it)
+                val pathToAnnotation = gqRestProperties.pathToClusterAnnotation(it)
+                LOG.info("Reading for $it  cluster modules from $pathToClusters, annotation from $pathToAnnotation")
+                populateClusterInfoFromFiles(
+                        clusters,
+                        pathToClusters,
+                        pathToAnnotation)
+            }
+            LOG.info("${clusters.size} clusters read for all species.")
+            clusters
+        } else {
+            LOG.info("Clustering is not available. See properties.")
+            emptyList()
+        }
+    }
 }

@@ -2,6 +2,7 @@ package gq.rest.api
 
 import gq.core.data.GQGseInfo
 import gq.rest.Application
+import gq.rest.GQDataRepository
 import gq.rest.api.GeneSetEnrichmentController.Companion.URL
 import org.hamcrest.Matchers.*
 import org.junit.Before
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import java.util.*
 
 
 @RunWith(SpringJUnit4ClassRunner::class)
@@ -29,6 +31,9 @@ open class GeneSetEnrichmentControllerTest {
 
     @Autowired
     lateinit var wac: WebApplicationContext
+
+    @Autowired
+    lateinit var repository: GQDataRepository
 
     lateinit var mockMvc: MockMvc
 
@@ -61,6 +66,33 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].intersectionSize", equalTo(55)))
                 .andExpect(jsonPath("$.result.gseToTitle.GSE10021", equalTo("Some gse.")))
                 .andExpect(jsonPath("$.result.gseToTitle.GSE10245", equalTo(GQGseInfo.DEFAULT_TITLE)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.groupId", equalTo(0)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.moduleNames", hasSize<Int>(3)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.moduleNames", hasItem("GSE10245_GPL570#17")))
+    }
+
+    @Test
+    fun testNetworkClustering() {
+        val requestForm = GeneSetEnrichmentController.EnrichmentRequestForm()
+        val queryGenes = repository.moduleCollection.fullNameToGQModule[Triple(10089, 96, 14)]!!.sortedEntrezIds.slice(0..70)
+                .plus(repository.moduleCollection.fullNameToGQModule[Triple(10089, 96, 15)]!!.sortedEntrezIds.slice(0..70))
+                .plus(repository.moduleCollection.fullNameToGQModule[Triple(10089, 96, 16)]!!.sortedEntrezIds.slice(0..70))
+                .plus(repository.moduleCollection.fullNameToGQModule[Triple(10089, 96, 17)]!!.sortedEntrezIds.slice(0..50))
+        requestForm.genes = queryGenes.map { it.toString() }
+        requestForm.speciesFrom = "hs"
+        requestForm.speciesTo = "hs"
+
+        mockMvc.makeRequest(URL, requestForm)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.groupId", equalTo(0)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.moduleNames", equalTo(listOf("GSE10089_GPL96#17"))))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.annotation", nullValue()))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.1.moduleNames", hasSize<Int>(2)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.1.moduleNames", equalTo(listOf("GSE10089_GPL96#14","GSE10089_GPL96#15"))))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.1.annotation", equalTo("First	cluster")))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.2.moduleNames", hasSize<Int>(1)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.2.moduleNames", equalTo(listOf("GSE10089_GPL96#16"))))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.2.annotation", equalTo("Second, cluster")))
     }
 
     @Test
@@ -94,8 +126,9 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.identifiedGeneFormat", equalTo("symbol")))
-                .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(0)))
-                .andExpect(jsonPath("$.result.gseToTitle", equalTo(emptyMap<String, String>())))
+                .andExpect(jsonPath("$.result.enrichmentResultItems", equalTo(Collections.EMPTY_LIST)))
+                .andExpect(jsonPath("$.result.gseToTitle", equalTo(Collections.EMPTY_MAP)))
+                .andExpect(jsonPath("$.result.networkClusteringGroups", equalTo(Collections.EMPTY_MAP)))
     }
 
     @Test

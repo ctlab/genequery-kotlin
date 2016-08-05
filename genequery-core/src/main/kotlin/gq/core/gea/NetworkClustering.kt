@@ -11,7 +11,7 @@ class ScoredEnrichedItemsGroup(val groupId: Int,
                                val annotation: String? = null) {
     companion object {
         fun zeroGroup(moduleNames: List<String>, score: Double) =
-                ScoredEnrichedItemsGroup(GQNetworkCluster.ZERO_CLUSTER_ID, moduleNames, score)
+                ScoredEnrichedItemsGroup(GQNetworkCluster.FREE_CLUSTER_ID, moduleNames, score)
     }
     constructor(cluster: GQNetworkCluster, moduleNames: List<String>, score: Double)
     : this(cluster.id, moduleNames, score, cluster.annotation)
