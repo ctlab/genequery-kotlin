@@ -5,6 +5,7 @@ import gq.rest.Application
 import gq.rest.GQDataRepository
 import gq.rest.api.GeneSetEnrichmentController.Companion.URL
 import org.hamcrest.Matchers.*
+import org.hamcrest.number.BigDecimalCloseTo
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import java.math.BigDecimal
 import java.util.*
 
 
@@ -87,6 +89,7 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.networkClusteringGroups.0.groupId", equalTo(0)))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.0.moduleNames", equalTo(listOf("GSE10089_GPL96#17"))))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.0.annotation", nullValue()))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.score", BigDecimalCloseTo.closeTo(BigDecimal(-34.8720506792), BigDecimal(1e-5))))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.1.moduleNames", hasSize<Int>(2)))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.1.moduleNames", equalTo(listOf("GSE10089_GPL96#14","GSE10089_GPL96#15"))))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.1.annotation", equalTo("First	cluster")))
