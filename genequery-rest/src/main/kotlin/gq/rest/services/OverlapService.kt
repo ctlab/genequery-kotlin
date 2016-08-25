@@ -2,13 +2,12 @@ package gq.rest.services
 
 import gq.core.data.GQModule
 import gq.core.data.Species
-import gq.core.data.intersectWithSorted
 import gq.rest.GQDataRepository
 import gq.rest.exceptions.BadRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-data class OverlapResponse(val overlapSymbolGenes: List<String>)
+data class OverlapResponse(val overlapSymbolGenes: List<String>, val otherModuleSymbolGenes: List<String>)
 
 @Service
 open class OverlapService @Autowired constructor(private val gqDataRepository: GQDataRepository) {
@@ -26,11 +25,19 @@ open class OverlapService @Autowired constructor(private val gqDataRepository: G
                          speciesFrom: Species,
                          speciesTo: Species = speciesFrom,
                          moduleName: String): OverlapResponse {
-        val conversionMap = convertGenesToEntrez(rawGenes, speciesFrom, speciesTo, gqDataRepository).second
         val module = getModule(moduleName)
-        val entrezIds = conversionMap.values.filterNotNull().toLongArray().sortedArray()
-        val entrezOverlap = entrezIds intersectWithSorted module.sortedEntrezIds
-        val overlapGenes = gqDataRepository.smartConverter.toSymbol(entrezOverlap.toList(), speciesFrom, speciesTo).mapNotNull { it.value }
-        return OverlapResponse(overlapGenes)
+        val inputEntrezIds = convertGenesToEntrez(rawGenes, speciesFrom, speciesTo, gqDataRepository)
+                .second.values.filterNotNull().toSet()
+        val entrezToSymbolModuleGenes = gqDataRepository.smartConverter.toSymbol(module.sortedEntrezIds.toList(), speciesFrom, speciesTo)
+        val overlapSymbolGenes = mutableListOf<String?>()
+        val otherModuleSymbolGenes = mutableListOf<String?>()
+        module.sortedEntrezIds.forEach {
+            if (it in inputEntrezIds) {
+                overlapSymbolGenes.add(entrezToSymbolModuleGenes[it])
+            } else {
+                otherModuleSymbolGenes.add(entrezToSymbolModuleGenes[it])
+            }
+        }
+        return OverlapResponse(overlapSymbolGenes.filterNotNull(), otherModuleSymbolGenes.filterNotNull())
     }
 }

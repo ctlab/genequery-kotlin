@@ -44,6 +44,7 @@ open class GeneSetEnrichmentControllerTest {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build()
     }
 
+    fun bigDecimalCloseTo(value: Double, error: Double) = BigDecimalCloseTo.closeTo(BigDecimal(value), BigDecimal(error))
 
     @Test
     fun testBasicRequestSameSpeciesEntrezToEntrez() {
@@ -64,7 +65,7 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.geneConversionMap.494143", equalTo(494143)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems", hasSize<Int>(3)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].gse", equalTo(10021)))
-                .andExpect(jsonPath("$.result.enrichmentResultItems[0].logAdjPvalue", closeTo(-131.88785323, 1e-5)))
+                .andExpect(jsonPath("$.result.enrichmentResultItems[0].logAdjPvalue", bigDecimalCloseTo(-131.88698551435778, 1e-5)))
                 .andExpect(jsonPath("$.result.enrichmentResultItems[0].intersectionSize", equalTo(55)))
                 .andExpect(jsonPath("$.result.gseToTitle.GSE10021", equalTo("Some gse.")))
                 .andExpect(jsonPath("$.result.gseToTitle.GSE10245", equalTo(GQGseInfo.DEFAULT_TITLE)))
@@ -89,7 +90,7 @@ open class GeneSetEnrichmentControllerTest {
                 .andExpect(jsonPath("$.result.networkClusteringGroups.0.groupId", equalTo(0)))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.0.moduleNames", equalTo(listOf("GSE10089_GPL96#17"))))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.0.annotation", nullValue()))
-                .andExpect(jsonPath("$.result.networkClusteringGroups.0.score", BigDecimalCloseTo.closeTo(BigDecimal(-34.8720506792), BigDecimal(1e-5))))
+                .andExpect(jsonPath("$.result.networkClusteringGroups.0.score", closeTo(-34.87118295772012, 1e-5)))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.1.moduleNames", hasSize<Int>(2)))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.1.moduleNames", equalTo(listOf("GSE10089_GPL96#14","GSE10089_GPL96#15"))))
                 .andExpect(jsonPath("$.result.networkClusteringGroups.1.annotation", equalTo("First	cluster")))

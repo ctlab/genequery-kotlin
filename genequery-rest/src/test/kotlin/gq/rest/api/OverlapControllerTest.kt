@@ -48,6 +48,22 @@ open class OverlapControllerTest {
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(4)))
+                .andExpect(jsonPath("$.result.otherModuleSymbolGenes", hasSize<Int>(49)))
+    }
+
+    @Test
+    fun testWholeModuleOverlap() {
+        val requestForm = OverlapController.OverlapRequestForm()
+        val queryGenes = listOf("440915", "127703", "85377", "81577")
+        requestForm.genes = queryGenes
+        requestForm.speciesFrom = "hs"
+        requestForm.speciesTo = "hs"
+        requestForm.moduleName = "GSE10271_GPL570#0"
+        mockMvc.makeRequest(URL, requestForm)
+                .andExpect(status().isOk)
+                .andExpect(jsonPath("$.success", equalTo(true)))
+                .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(4)))
+                .andExpect(jsonPath("$.result.otherModuleSymbolGenes", hasSize<Int>(0)))
     }
 
     @Test
@@ -66,6 +82,7 @@ open class OverlapControllerTest {
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(queryGenes.size)))
+                .andExpect(jsonPath("$.result.otherModuleSymbolGenes", hasSize<Int>(53 - queryGenes.size)))
     }
 
     @Test
@@ -80,6 +97,7 @@ open class OverlapControllerTest {
                 .andExpect(status().isOk)
                 .andExpect(jsonPath("$.success", equalTo(true)))
                 .andExpect(jsonPath("$.result.overlapSymbolGenes", hasSize<Int>(0)))
+                .andExpect(jsonPath("$.result.otherModuleSymbolGenes", hasSize<Int>(53)))
     }
 
     @Test
