@@ -10,6 +10,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/genequery-console" />
             <option value="$PROJECT_DIR$/genequery-core" />
             <option value="$PROJECT_DIR$/genequery-rest" />
           </set>
@@ -18,6 +19,7 @@
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/genequery-console" />
             <option value="$PROJECT_DIR$/genequery-core" />
             <option value="$PROJECT_DIR$/genequery-rest" />
           </set>
