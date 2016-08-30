@@ -1,0 +1,27 @@
+GSE	GPL	moduleNumber	logPvalue	logAdjPvalue	intersectionSize	moduleSize	title
+GSE13046	GPL571	3	-10.215353611656198	-5.14532683355975	17	668	Microarray analysis of Huh7 cells treated with IFNa2, OSM or IFNa2 combined with OSM
+GSE16870	GPL570	6	-9.871198500550188	-4.801171722453739	15	406	HeLa cells treated with V-ATPase inhibitors or with desoxyferramine compared to HeLa in DMSO or medium with low LDL
+GSE5230	GPL570	9	-9.469179759897008	-4.399152981800559	11	219	Epigenetics of gene expression in human hepatoma cells
+GSE39042	GPL570	7	-9.380650922141822	-4.310624144045373	10	128	Expression data from MDA-MB-231 cells exposed to hypoxia and/or paclitaxel or epirubicin
+GSE6802	GPL571	2	-9.075291176351593	-4.005264398255146	17	745	Gene expression analysis of bronchial epithelial cells stimulated by different airway pathogens.
+GSE44295	GPL6883	12	-8.593028512076392	-3.5230017339799446	8	110	Genome-wide gene expression analysis of  primary uveal melanoma cells, normal uveal melanocytes, neural crest stem cells, embryonic stem cells and uveal melanoma cell lines MUM2B and OCM1A
+GSE44299	GPL6883	12	-8.593028512076392	-3.5230017339799446	8	110	Primary uveal melanoma cells, normal uveal melanocytes, neural crest stem cells, embryonic stem cells and uveal melanoma cell lines
+GSE51873	GPL10558	14	-8.564716815503305	-3.4946900374068557	7	99	LNCAP/AR and a LnCAP/AR subline (LREX') with acquired resistance to 2nd generation antiandrogens
+GSE44073	GPL10558	11	-8.50304910507521	-3.4330223269787616	8	154	Liver X Receptors play an antitumoral role in the intestine
+GSE61799	GPL6884	7	-8.449033593954063	-3.3790068158576143	10	310	ICI182780 effect on breast cancer cell in hypoxia
+GSE48002	GPL6244	2	-8.338638141420757	-3.268611363324309	22	1856	Protein Domain Mimetics as In Vivo Modulators of Hypoxia-Inducible Factor Signaling
+GSE6740	GPL96	2	-8.333315545227132	-3.2632887671306827	13	662	Comparison of transcriptional profiles of CD4+ and CD8+ T cells from HIV-infected pateints and uninfected control group
+GSE14334	GPL570	5	-8.30971401606131	-3.239687237964861	11	268	Transcriptomic analysis of human lung development
+GSE55811	GPL570	9	-8.148756932350393	-3.0787301542539445	8	125	Colon Tumor Cell Macrophage Interactions
+GSE34112	GPL570	2	-8.010844494579864	-2.940817716483416	14	656	Effect of NO-sulindac treatment on hypoxic prostate cancer cells
+GSE7696	GPL570	17	-7.889622891011474	-2.819596112915025	8	95	Glioblastoma from a homogenous cohort of patients treated within clinical trial
+GSE35973	GPL570	17	-7.881509347127493	-2.811482569031045	6	74	Gene expression levels in colon cancer cells with mutant K-ras under hypoxic conditions
+GSE1982	GPL8300	16	-7.847999678200901	-2.777972900104453	8	108	PBMCs from CCI-779 Treated RCC subjects
+GSE27813	GPL10558	4	-7.661546291357316	-2.5915195132608675	10	404	Genome-wide analysis of gene expression perturbed by Pontin shRNA in MCF7 subjected to normoxic and hypoxic conditions
+GSE32443	GPL571	2	-7.518938739311266	-2.448911961214818	17	1113	Identical gene regulation patterns of triiodothyronine (T3) and selective thyroid hormone receptor modulator GC-1 [Affymetrix]
+GSE32445	GPL571	2	-7.518938739311266	-2.448911961214818	17	1113	Identical gene regulation patterns of triiodothyronine (T3) and selective thyroid hormone receptor modulator GC-1
+GSE73061	GPL10558	10	-7.466420249558376	-2.3963934714619275	7	103	Gene expression profiling of the effects of organic dust in lung epithelial and THP-1 cells reveals inductive effects on inflammatory mediators [391 expt: A549 vs BEAS 2B]
+GSE27915	GPL4133	14	-7.2733206867027596	-2.203293908606311	7	83	Transcription profiling of human olfactory ecto-mesenchymal stem cells (hOE-MSCs) from familial dysautonomia (FD) patients with or without kinetin treatment
+GSE42048	GPL570	5	-7.216278738006565	-2.1462519599101166	7	92	TWEAK-treated time course in ACHN cells grown as xenografts
+GSE31534	GPL570	8	-7.120191169629623	-2.050164391533175	6	61	Gene expression profile in A375 melanoma cells after 45 functionally important molecules were knocked down using siRNA
+GSE38061	GPL6244	11	-7.085518808004435	-2.0154920299079873	8	203	Expression data from HCT116 colorectal cancer cells.
