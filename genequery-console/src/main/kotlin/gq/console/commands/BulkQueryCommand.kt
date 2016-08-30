@@ -203,6 +203,24 @@ class BulkQueryCommand : Command {
 
     override fun name() = "bulkquery"
 
-    override fun description() = "Run set of queries in parallel"
+    override fun briefDescription() = "Run set of queries in parallel"
+    override fun detailedDescription() =
+"""
+This command handles set of queries in parallel (see threads option).
+Each query should be placed in separate file in `dest` folder.
+Query format is as follows:
+    1) first line contains original species: hs, mm or rt
+    2) second line contains target species: hs, mm or rt
+    3) all the rest lines are interpreted as input genes
+        in one ENTREZ, SYMBOL, REFSEQ or ENSEMBL format
+If source species doesn't equal to target one, orthology is applied.
+Input genes can be placed in a single line, and separated by white-space or any of "\t\n\r\f".
 
+For each query file <query-file-name> the command produces following files in destination folder:
+    1) <query-file-name>.conversion.csv – conversion table of input genes for source species to entrez for target species.
+    2) <query-file-name>.result.csv – enriched items ordered by log adj.p.value
+    3) (if any errors) <query-file-name>.err – information about error(s) occurred while processing the query.
+
+The command creates destination folder, and erases its content if it already exists.
+"""
 }

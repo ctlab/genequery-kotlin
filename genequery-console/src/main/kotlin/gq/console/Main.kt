@@ -17,7 +17,7 @@ fun printIntroductionHelp() {
 
     val options2 = Options()
     formatter.optPrefix = ""
-    NAME_TO_COMMAND.forEach { options2.addOption(it.key, false, it.value.description()) }
+    NAME_TO_COMMAND.forEach { options2.addOption(it.key, false, it.value.briefDescription()) }
 
     val pw = PrintWriter(System.out)
     formatter.printOptions(pw, formatter.width, options2, formatter.leftPadding, formatter.descPadding)

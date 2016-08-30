@@ -8,11 +8,13 @@ interface Command {
     fun execute(cmdLine: CommandLine)
     fun options(): Options
     fun name(): String
-    fun description(): String
+    fun briefDescription(): String
+    fun detailedDescription(): String
 
     fun printHelp() {
         val options = getOptionsWithHelp()
-        HelpFormatter().printHelp("$BASE_COMMAND_NAME ${name()} [arguments]", options)
+        val formatter = HelpFormatter()
+        formatter.printHelp("$BASE_COMMAND_NAME ${name()} [arguments]", detailedDescription(), options, null)
     }
 
     fun getOptionsWithHelp(): Options {
