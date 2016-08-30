@@ -34,6 +34,9 @@ fun runCommand(cmd: Command, args: Array<String>) {
     } catch (e: MissingOptionException) {
         println("Missing options: ${e.missingOptions.joinToString(",")}")
         cmd.printHelp()
+    } catch (e: MissingArgumentException) {
+        println("Missing argument for option: ${e.option}")
+        cmd.printHelp()
     } catch (e: UnrecognizedOptionException) {
         println("Unknown option: ${e.option}")
         cmd.printHelp()
