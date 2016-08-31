@@ -1,9 +1,10 @@
 build/
 genequery-core/build/
 /src/
+*.iml
 
 !gradle-wrapper.jar
-gradle/wrapper/gradle-wrapper.properties
+# gradle/wrapper/gradle-wrapper.properties
 .gradle
 .idea/workspace.xml
 .idea/dictionaries/*
