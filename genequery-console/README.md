@@ -1,3 +1,16 @@
+## Quick Start
+You need to have Java8 to be pre-installed on your machine. Check it first:
+```
+java -version
+```
+If you see `java version "1.8.<some-version>"`, go ahead:
+```
+wget http://genome.ifmo.ru/genequery-media/2015/downloads/console/gqcmd-internal.tar.gz
+wget http://genome.ifmo.ru/genequery-media/2015/downloads/console/gqcmd.jar
+tar -zxf gqcmd-internal.tar.gz
+java -jar gqcmd.jar -h
+```
+
 ## Building
 
 `../gradlew build` from `genequery-console` project folde or
