@@ -5,7 +5,8 @@
 `./gradlew :console:build` from `genequery-kotlin` folder.
 
 ## Internal data
-Ask @smolcoder how to get the data.
+Check out [donwloads](http://genome.ifmo.ru/genequery/downloads) page on GeneQuery web site.
+You will need to decompress the archive and specify path to the folder as gqcmd option.
 
 ## Commands
 
@@ -38,7 +39,7 @@ not-a-species
 ```
 
 ```
-java -jar path/to/gqcmd.jar bulkquery -t 6 -dp /path/to/genequery-data-files -q /path/to/queries -d /path/to/result
+java -jar path/to/gqcmd.jar bulkquery -t 6 -dp /path/to/gqcmd-internal -q /path/to/queries -d /path/to/result
 ~ tree path/to/result
 path/to/result
 ├── 1.txt.conversion.csv
