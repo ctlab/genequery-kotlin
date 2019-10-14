@@ -32,7 +32,7 @@ open class GeneSetEnrichmentController @Autowired constructor(val geneSetEnrichm
         binder.addValidators(EnrichmentRequestFormValidator())
     }
 
-    @RequestMapping(value = URL,
+    @RequestMapping(value = [URL],
             produces = arrayOf("application/json"),
             method = arrayOf(RequestMethod.POST))
     @ResponseStatus(HttpStatus.OK)

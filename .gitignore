@@ -9,3 +9,4 @@ genequery-core/build/
 .idea/workspace.xml
 .idea/dictionaries/*
 .idea/libraries/*
+/.idea/

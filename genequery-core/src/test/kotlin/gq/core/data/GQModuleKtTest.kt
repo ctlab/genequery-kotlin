@@ -46,18 +46,17 @@ class GQModuleKtTest {
     @Test
     fun testParseFullModuleName() {
         val stringName = "GSE123_GPL123#12"
-        val (gse, gpl, number) = GQModule.parseFullModuleName(stringName)
-        assertEquals(123, gse)
-        assertEquals(123, gpl)
-        assertEquals(12, number)
+        val (datasetId, clusterId) = GQModule.parseFullModuleName(stringName)
+        assertEquals("GSE123_GPL123", datasetId)
+        assertEquals("12", clusterId)
     }
 
     @Test
     fun testBuildByFullName() {
         val stringName = "GSE123_GPL123#12"
         val module = GQModule.buildByFullName(stringName, Species.HUMAN, longArrayOf(1, 2, 3, 4))
-        assertEquals(Pair(123, 123), module.seriesName())
-        assertEquals(Triple(123, 123, 12), module.fullName())
+        assertEquals("GSE123_GPL123", module.seriesName())
+        assertEquals(Pair("GSE123_GPL123", "12"), module.fullName())
         assertEquals(stringName, module.joinFullName())
     }
 
@@ -66,13 +65,12 @@ class GQModuleKtTest {
         GQModule.parseFullModuleName("GSE123_GPL124")
     }
 
-    @Test(expected=IllegalArgumentException::class)
-    fun testParseFullModuleNameBadNotEnoughParts2() {
-        GQModule.parseFullModuleName("GSE123#3")
-    }
 
-    @Test(expected=IllegalArgumentException::class)
+    @Test
     fun testParseFullModuleNameBadNumber() {
-        GQModule.parseFullModuleName("GSE123_GPL124#asdf")
+        val stringName = "GSE123_GPL124#asdf"
+        val (datasetId, clusterId) = GQModule.parseFullModuleName(stringName)
+        assertEquals("GSE123_GPL124", datasetId)
+        assertEquals("asdf", clusterId)
     }
 }

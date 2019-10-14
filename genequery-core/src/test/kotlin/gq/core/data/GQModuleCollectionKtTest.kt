@@ -15,8 +15,8 @@ class GQModuleCollectionKtTest {
     @Test
     fun testGetFullNameToGQModule() {
         assertEquals(23, dataset.fullNameToGQModule.size)
-        assertEquals(13, dataset.fullNameToGQModule[Triple(1000, 96, 0)]!!.size)
-        assertTrue(Triple(1000, 96, 4) in dataset.fullNameToGQModule)
+        assertEquals(13, dataset.fullNameToGQModule[Pair("GSE1000_GPL96", "0")]!!.size)
+        assertTrue(Pair("GSE1000_GPL96", "4") in dataset.fullNameToGQModule)
     }
 
     @Test
@@ -31,23 +31,23 @@ class GQModuleCollectionKtTest {
     @Test
     fun testGetGseGplToModules() {
         assertEquals(4, dataset.seriesToModules.size)
-        assertTrue(Pair(1000, 96) in dataset.seriesToModules)
-        assertTrue(Pair(10001, 1261) in dataset.seriesToModules)
-        assertEquals(7, dataset.seriesToModules[Pair(10001, 1261)]!!.size)
+        assertTrue("GSE1000_GPL96" in dataset.seriesToModules)
+        assertTrue("GSE10001_GPL1261" in dataset.seriesToModules)
+        assertEquals(7, dataset.seriesToModules["GSE10001_GPL1261"]!!.size)
         assertTrue(
             "modules are not sorted within gse",
-            dataset.seriesToModules[Pair(10000, 1261)]!!
-                    .mapIndexed { i, gqModule ->  i == gqModule.number}
+            dataset.seriesToModules["GSE10000_GPL1261"]!!
+                    .mapIndexed { i, gqModule ->  i.toString() == gqModule.clusterId}
                     .all { it })
         assertTrue(
                 "modules are not sorted within gse",
-                dataset.seriesToModules[Pair(1001, 96)]!!
-                        .mapIndexed { i, gqModule ->  i == gqModule.number}
+                dataset.seriesToModules["GSE1001_GPL96"]!!
+                        .mapIndexed { i, gqModule ->  i.toString() == gqModule.clusterId}
                         .all { it })
     }
 
     @Test
     fun testGetSpeciesToGseGpl() {
-        assertEquals(listOf(Pair(1000, 96), Pair(1001, 96)), dataset.speciesToGseGpl[Species.HUMAN])
+        assertEquals(listOf("GSE1000_GPL96", "GSE1001_GPL96"), dataset.speciesToGseGpl[Species.HUMAN])
     }
 }

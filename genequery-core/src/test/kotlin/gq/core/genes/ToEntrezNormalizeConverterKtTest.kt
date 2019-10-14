@@ -10,7 +10,7 @@ import java.nio.file.Paths
 class ToEntrezNormalizeConverterKtTest {
     companion object : ConverterCompanionTestBase() {
         val converter = createToEntrezConverter()
-        fun mapOfToLong(vararg pairs: Pair<String, Int?>) = mapOf(*pairs).mapValues { it.value?.toLong() ?: null }
+        fun mapOfToLong(vararg pairs: Pair<String, Int?>) = mapOf(*pairs).mapValues { it.value?.toLong() }
     }
 
     @Test

@@ -33,7 +33,7 @@ open class OverlapController @Autowired constructor(val overlapService: OverlapS
         binder.addValidators(OverlapRequestFormValidator())
     }
 
-    @RequestMapping(value = URL,
+    @RequestMapping(value = [URL],
             produces = arrayOf("application/json"),
             method = arrayOf(RequestMethod.POST))
     @ResponseStatus(HttpStatus.OK)

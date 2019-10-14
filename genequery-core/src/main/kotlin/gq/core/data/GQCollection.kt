@@ -30,7 +30,7 @@ class GQModuleCollection(modules: Iterable<GQModule>) {
 
     constructor(modulesInit: () -> Iterable<GQModule>) : this(modulesInit())
 
-    val fullNameToGQModule = modules.associate { it.fullName() to it }
+    val fullNameToGQModule = modules.associateBy { it.fullName() }
 
     val speciesToModules = fullNameToGQModule.values
             .groupBy { it.species }
@@ -38,7 +38,7 @@ class GQModuleCollection(modules: Iterable<GQModule>) {
     val seriesToModules = fullNameToGQModule.values
             .groupBy { it.seriesName() }
             .mapValues { it -> it.value
-                    .sortedBy { it.number }
+                    .sortedBy { it.clusterId }
                     .toTypedArray() }
 
     val speciesToGseGpl = seriesToModules.keys.groupBy { seriesToModules[it]!!.first().species }

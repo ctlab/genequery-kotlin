@@ -3,9 +3,8 @@ package gq.core.gea
 import gq.core.data.*
 import gq.core.math.FisherExact
 
-data class EnrichmentResultItem(val gse: Int,
-                                val gpl: Int,
-                                val moduleNumber: Int,
+data class EnrichmentResultItem(val datasetId: String,
+                                val clusterId: String,
                                 val pvalue: Double,
                                 val logPvalue: Double,
                                 val adjPvalue: Double,
@@ -18,7 +17,8 @@ data class EnrichmentResultItem(val gse: Int,
     }
 
     constructor(module: GQModule, pvalue: Double, adjPvalue: Double, intersectionSize: Int) : this(
-            module.gse, module.gpl, module.number,
+            module.datasetId,
+            module.clusterId,
             pvalue,
             if (pvalue > 0) Math.log10(pvalue) else MIN_LOG_P_VALUE,
             adjPvalue,
@@ -41,17 +41,17 @@ fun findBonferroniSignificant(
     val moduleCount = moduleCollection.speciesToModules[query.species]!!.size
 
     return experimentsForThisSpecies.mapNotNull(
-            fun(it: Pair<Int, Int>): List<EnrichmentResultItem>? {
+            fun(it: String): List<EnrichmentResultItem>? {
                 val modules = moduleCollection.seriesToModules[it]!!
                 val moduleIdToIntersectionSize = modules
-                        .associate { it.number to it.sortedEntrezIds.sizeOfIntersectionWithSorted(queryEntrezIds) }
+                        .associate { it.clusterId to it.sortedEntrezIds.sizeOfIntersectionWithSorted(queryEntrezIds) }
                 val queryUniverseOverlap = moduleIdToIntersectionSize.values.sum()
 
                 if (queryUniverseOverlap == 0) return null
 
                 val universeSize = modules.sumBy { it.size }
-                return modules.filter { it.number > 0 && moduleIdToIntersectionSize[it.number]!! > 0}.mapNotNull { module ->
-                    val moduleAndQuery = moduleIdToIntersectionSize[module.number]!!
+                return modules.filter { moduleIdToIntersectionSize[it.clusterId]!! > 0}.mapNotNull { module ->
+                    val moduleAndQuery = moduleIdToIntersectionSize[module.clusterId]!!
                     val moduleAndNotQuery = module.size - moduleAndQuery
                     val queryAndNotModule = queryUniverseOverlap - moduleAndQuery
                     val restOfGenes = universeSize - moduleAndQuery - queryAndNotModule - moduleAndNotQuery
@@ -67,6 +67,6 @@ fun findBonferroniSignificant(
 
                 }
             }
-        ).flatMap { it }.sorted()
+        ).flatten().sorted()
 }
 

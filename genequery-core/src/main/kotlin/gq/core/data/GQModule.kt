@@ -27,14 +27,14 @@ fun LongArray.sizeOfIntersectionWithSorted(other: LongArray): Int {
     var otherIndex = 0
 
     while (thisIndex < size && otherIndex < other.size) {
-        if (this[thisIndex] == other[otherIndex]) {
-            result++
-            thisIndex++;
-            otherIndex++;
-        } else if (this[thisIndex] > other[otherIndex]) {
-            otherIndex++;
-        } else {
-            thisIndex++;
+        when {
+            this[thisIndex] == other[otherIndex] -> {
+                result++
+                thisIndex++;
+                otherIndex++;
+            }
+            this[thisIndex] > other[otherIndex] -> otherIndex++
+            else -> thisIndex++
         }
     }
     return result
@@ -44,42 +44,38 @@ fun LongArray.sizeOfIntersectionWithSorted(other: LongArray): Int {
 fun LongArray.sizeOfIntersectionWithSorted(other: List<Long>) = sizeOfIntersectionWithSorted(other.toLongArray())
 
 
-open class GQModule(val gse: Int, val gpl: Int, val number: Int, val species: Species, entrezIds: LongArray) {
+open class GQModule(
+        val datasetId: String,
+        val clusterId: String,
+        val species: Species,
+        entrezIds: LongArray) {
     init {
-        require(entrezIds.isNotEmpty(), {"Empty entrezIds array"})
+        require(entrezIds.isNotEmpty()) {"Empty entrezIds array"}
     }
 
     val sortedEntrezIds = entrezIds.sorted().toLongArray()
     val size = sortedEntrezIds.size
 
     companion object {
-        val GSE_PREFIX = "GSE"
-        val GPL_PREFIX = "GPL"
-
-        fun parseFullModuleName(fullName: String): Triple<Int, Int, Int> {
-            val parts = fullName.split('_', '#')
-            require(parts.size == 3, {"full module name $fullName has bad format"})
-            require(parts.component1().startsWith(GSE_PREFIX))
-            require(parts.component2().startsWith(GPL_PREFIX))
-            return Triple(
-                    parts.component1().substringAfter(GSE_PREFIX).toInt(),
-                    parts.component2().substringAfter(GPL_PREFIX).toInt(),
-                    parts.component3().toInt())
+        fun parseFullModuleName(fullName: String): Pair<String, String> {
+            val parts = fullName.split('#')
+            require(parts.size == 2) {"full module name $fullName has bad format"}
+            return Pair(parts.component1(), parts.component2())
         }
 
         fun buildByFullName(fullName: String, species: Species, entrezIds: LongArray): GQModule {
-            val (gse, gpl, number) = parseFullModuleName(fullName)
-            return GQModule(gse, gpl, number, species, entrezIds)
+            val (datasetId, clusterId) = parseFullModuleName(fullName)
+            return GQModule(datasetId, clusterId, species, entrezIds)
         }
 
-        fun joinFullName(gse: Int, gpl: Int, number: Int) = "GSE${gse}_GPL$gpl#$number"
+        fun joinFullName(datasetId: String, clusterId: String) = "$datasetId#$clusterId"
     }
 
-    fun joinFullName() = joinFullName(gse, gpl, number)
+    fun joinFullName() = joinFullName(datasetId, clusterId)
 
-    fun fullName() = Triple(gse, gpl, number)
+    fun fullName() = Pair(datasetId, clusterId)
 
-    fun seriesName() = Pair(gse, gpl)
+    fun seriesName() = datasetId
 
     override fun toString() = "${joinFullName()}$species,$size genes)"
 }
